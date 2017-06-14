@@ -10,3 +10,5 @@ function greeting()
 }
 
 greeting('Hi', 'Hey', 'Hello');  // Displays the echos of function greeting().
+
+?>
