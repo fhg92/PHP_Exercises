@@ -34,6 +34,7 @@ if (preg_match_all('/[!@#$%^&*()\-_=+{};:,<.>§~]/', $str) < 1)
     echo 'The string must have at least one special character.<br>'.PHP_EOL;
 }
 
+// Replaces 1993 with 1992 with preg_replace()
 $birthday = 'July 8, 1993';
 $birthday = preg_replace('([0-9]+93)', '1992', $birthday);
 
