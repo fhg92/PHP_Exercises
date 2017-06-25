@@ -62,8 +62,12 @@ if($hello | $world)
 if($hello ^ $world)
     echo 'XOR';
 
+// 128 64 32 16 8 4 2 1
+
+// decbin() can be used to convert decimal number to binary number.
 $i = 4;
 echo $i << 2; // Outputs 16
+echo decbin($i << 2);
 echo $i << 3; // Outputs 32
 echo $i << 4; // Outputs 64
 
