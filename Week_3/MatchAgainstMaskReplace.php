@@ -7,9 +7,9 @@ $greeting = 'Goodmorning sir.';
 // Outputs 11, because 11 characters are matching.
 echo strspn($greeting, 'Goodmorning').'<br/>'.PHP_EOL;
 
-$letters = array('g','o','d','m','r','n','i','g');
+$letters = array('o','d','m','r','n','i','G');
 
-// Outputs 0 for each character.  
+// Outputs 0 for each character until it finds 'G'.  
 foreach($letters as $test){
 echo strspn($greeting, $test).'<br/>'.PHP_EOL;
 }
