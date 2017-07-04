@@ -1,13 +1,12 @@
 <?php
 
-$licensePlate = $_POST['licensePlate'];
+$licensePlate = strtoupper($_POST['licensePlate']);
 
 // If input type is not filled in or doesn't meet preg_match() requirements.
 // Redirect and show message.
 if($licensePlate == null || !preg_match('/^[A-Z0-9]{6}$/',$licensePlate)) {
     header('Location: LicensePlateForm.php?invalid'); 
 } else {
-//preg_match('/(?=.*[A-Z])(?=.*[0-9]){6}/',$licensePlate)
 $json = file_get_contents(
     'https://opendata.rdw.nl/resource/qyrd-w56j.json?kenteken=' . $licensePlate
 );
@@ -18,7 +17,7 @@ $decode = json_decode($json);
 if(!isset($decode[0]->kenteken)) {
     header('Location: LicensePlateForm.php?not_registered'); 
 } 
-// If license plate exists. Show car info.    
+// If license plate exists. Show car info.
 else {
 echo 'Kenteken: '.$decode[0]->kenteken.'<br>'.PHP_EOL.
 'Voertuigsoort: '.$decode[0]->voertuigsoort.'<br>'.PHP_EOL.

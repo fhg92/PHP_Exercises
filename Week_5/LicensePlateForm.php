@@ -12,8 +12,7 @@
 
 if(isset($_GET['invalid']))
 {
-echo '<span style="color:red;">Voer een geldig kenteken in. 
-Het kenteken moet hoofdletters en cijfers bevatten.</span>';
+echo '<span style="color:red;">Voer een geldig kenteken in.</span>';
 }
 
 if(isset($_GET['not_registered']))
