@@ -6,11 +6,7 @@ $licensePlate = $_POST['licensePlate'];
 // Redirect and show message.
 if($licensePlate == null || !preg_match('/^[A-Z0-9]{6}$/',$licensePlate)) {
     header('Location: LicensePlateForm.php?invalid'); 
-}
-
-// If input type is filled in and meets preg_match() requirements.
-if($licensePlate != null && preg_match('/^[A-Z0-9]{6}$/',$licensePlate)) {
-    
+} else {
 //preg_match('/(?=.*[A-Z])(?=.*[0-9]){6}/',$licensePlate)
 $json = file_get_contents(
     'https://opendata.rdw.nl/resource/qyrd-w56j.json?kenteken=' . $licensePlate
@@ -27,11 +23,12 @@ else {
 echo 'Kenteken: '.$decode[0]->kenteken.'<br>'.PHP_EOL.
 'Voertuigsoort: '.$decode[0]->voertuigsoort.'<br>'.PHP_EOL.
 'Merk: '.$decode[0]->merk.'<br>'.PHP_EOL.
-'Handelsbenaming: '.$decode[0]->handelsbenaming.'<br>'.PHP_EOL;
+'Handelsbenaming: '.$decode[0]->handelsbenaming.'<br>'.PHP_EOL.
+'Bruto BPM: ';
 if(isset($decode[0]->bruto_bpm)) {
-echo 'Bruto BPM: '.$decode[0]->bruto_bpm.'<br>'.PHP_EOL;
+    echo $decode[0]->bruto_bpm.'<br>'.PHP_EOL;
 } else {
-echo 'Bruto BPM: Geen informatie beschikbaar<br>'.PHP_EOL;
+    echo 'Geen informatie beschikbaar<br>'.PHP_EOL;
 }
 echo 'Cilinderinhoud: '.$decode[0]->cilinderinhoud.'<br>'.PHP_EOL.
 'Datum eerste afgifte Nederland: '.$decode[0]->datum_eerste_afgifte_nederland.
