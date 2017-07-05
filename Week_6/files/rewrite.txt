@@ -1,0 +1,5 @@
+Input: test
+
+Last edited on: Wed, 05 Jul 2017 11:44:01
+
+Just testing file_put_contents.
