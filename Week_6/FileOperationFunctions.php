@@ -63,12 +63,14 @@ $file = 'rewrite.txt';
 $newfile = 'rewrite.txt.bak';
 
 // If copying fails, show message.
-if (!copy($file, $newfile))
+if (!copy($file, $newfile)) {
     echo "Failed to copy $file".'<br>'.PHP_EOL;
+}
 
 // file_exists().
-if(file_exists($file))
+if(file_exists($file)) {
     echo "$file exists".'<br>'.PHP_EOL;
+}
 
 // fputs(). Alias of fwrite().
 $file = fopen('test.txt','w');
