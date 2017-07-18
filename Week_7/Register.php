@@ -1,5 +1,3 @@
-<!-- WORK IN PROGRESS -->
-
 <html>
     <body>
         <form method='post'>
@@ -17,56 +15,25 @@
             <br>
             <input type='submit' name='register' value='Register'/>
         </form>
-               <a href='Login.php'>Already registered? Click here to log in.</a></p>
+        <a href='Login.php'>Already registered? Click here to log in.</a><br>
     </body>
 </html>
         
 <?php
 
 include('DbConnect.php');
+include('RegisterFunctions.php');
 
-if(isset($_POST['user'])) {
+if(isset($_POST['register'])) {
     if(isset($_POST['user']) && isset($_POST['password'])) {
         $user = mysqli_real_escape_string($mysqli, $_POST['user']);
         $password = mysqli_real_escape_string($mysqli, $_POST['password']);
         $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
     }
     
-    $select = "SELECT username FROM user WHERE username = '$user'";
-    $result = mysqli_query($mysqli, $select);
-    
-    switch($_POST['user']) {
-        case null:
-            $error[] = "Don't forget to fill in a username.<br>".PHP_EOL;
-            break;
-        case strlen($_POST['user']) < 3:
-            $error[] = 'Username has to be at least 3 characters.<br>'.PHP_EOL;
-            break;
-        case mysqli_num_rows($result) > 0: 
-            $error[] = 'Username already exists.<br>'.PHP_EOL;
-            break;
-    }   
-    
-    if(isset($_POST['password'])) { 
-        switch($_POST['password']) {
-            case null:
-                $error[] = "Don't forget to fill in a password.<br>".PHP_EOL;
-                break;
-            case strlen($_POST['password']) < 6:
-                $error[] = 'Password has to be at least 6 characters.<br>'.PHP_EOL;
-            case !preg_match('/[A-Z]/', $_POST['password']):
-                $error[] = 'Password should contain at least 1 uppercase letter.<br>'.PHP_EOL;
-            case !preg_match('/[0-9]/', $_POST['password']):
-                $error[] = 'Password should contain at least 1 number.
-                <br>'.PHP_EOL;
-            case !preg_match('/[\'\/~`\!@#\$%\^&\*\(\)_\-\+=\{\}\[\]\|;:"\<\>,\.\?\\\]/',
-                             $_POST['password']):
-                $error[] = 'Password should contain at least 1 special character.<br>'.PHP_EOL;
-                break;
-            case $_POST['password'] != $_POST['confirm']:
-                $error[] = "Passwords do not match.<br>".PHP_EOL;
-        }
-    }
+    checkUser($error);
+    checkUserDb($mysqli, $user, $error);
+    checkPassword($error);
     
     if(isset($error)) {
         foreach($error as $key => $value) {
