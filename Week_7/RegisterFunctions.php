@@ -24,7 +24,7 @@ function checkUserDb($mysqli, $user, &$error) {
     return true;
 }
 
-function checkPassword(&$error) {
+function checkPass(&$error) {
     if(isset($_POST['password'])) { 
          switch($_POST['password']) {
             case null:

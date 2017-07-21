@@ -14,10 +14,6 @@
             </div>
             <br>
             <input type='submit' name='register' value='Register'/>
-        </form>
-        <a href='Login.php'>Already registered? Click here to log in.</a><br>
-    </body>
-</html>
         
 <?php
 
@@ -33,7 +29,16 @@ if(isset($_POST['register'])) {
     
     checkUser($error);
     checkUserDb($mysqli, $user, $error);
-    checkPassword($error);
+    checkPass($error);
+    
+    if(checkUser($error) == true) {
+        checkUserDb($mysqli, $user, $error);
+    }
+    
+    /*if(checkPass($error) == true) {
+        checkPassDb($mysqli, $dbPassword, $error);
+        logIn($mysqli, $dbPassword, $error);
+    }*/
     
     if(isset($error)) {
         foreach($error as $key => $value) {
@@ -41,8 +46,22 @@ if(isset($_POST['register'])) {
         }
     } else {
         $sql = "INSERT INTO user(username, password) VALUES ('$user', '$password')";
-        mysqli_query($mysqli, $sql);   
+        mysqli_query($mysqli, $sql);
+        $message = "You've succesfully registered. ";
     }
 }
 
 ?>
+            
+        </form>
+        <a href='Login.php'>
+            <?php 
+            if(isset($message)) { 
+                echo $message;
+            }else{
+                echo 'Already registered? ';
+            }
+            ?>
+            Click here to log in.</a><br>
+    </body>
+</html>
