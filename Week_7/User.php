@@ -9,9 +9,6 @@ if(!isset($_SESSION['user'])) {
     header('Location: Login.php');
 }
 
-$user = $_SESSION['user'];
-$query = "SELECT * FROM user WHERE username != '$user'";
-$result = mysqli_query($mysqli, $query);
 ?>
 
 <html>
@@ -20,17 +17,19 @@ $result = mysqli_query($mysqli, $query);
             <p>Welcome <?= ucfirst(htmlentities($_SESSION['user'])); ?>.</p>
         </div>
         <div>
-            <p>Users:</p>
+            <p><b>Users:</b></p>
             <?php
             echo '<table>';
-            while($row = mysqli_fetch_array($result)){
-                echo '<tr>
-                <td>'.htmlentities($row['username']).' <a href = "User.php?add=' . $row['user_id'] . '">Add</a></td>
-                </tr>';
-                addFriend($row, $user, $mysqli, $curUser);
+            if(userCheck($mysqli, $user, $curUser, $otherUsers) == true) {
+                addFriend($mysqli, $curUser, $otherUsers);
+            } else{
+                echo 'There are no other registered users yet.';
             }
+            echo '</table><p><b>Friends:</b></p>';
+            getFriendRequest($mysqli, $curUser);
+            echo '<table>';
+            getFriendList($mysqli, $curUser);
             echo '</table>';
-            getFriendRequest($mysqli, $row, $curUser);
             ?>
         </div>
         <div>

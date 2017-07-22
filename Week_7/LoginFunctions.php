@@ -85,6 +85,10 @@ function logIn($mysqli, $dbPassword, &$error) {
     if(password_verify($password, $hash) && $_POST['password'] != null) {
         session_start();  
         $_SESSION['user'] = $_POST['user'];
+        $user = $_SESSION['user'];
+        $date = date('D d M, Y H:i a');
+        $sql = "UPDATE user SET last_login_date = '$date' WHERE username ='$user'";
+        mysqli_query($mysqli, $sql);
         header('Location: User.php');
     } else {
         $error = 'Login failed.<br>'.PHP_EOL;

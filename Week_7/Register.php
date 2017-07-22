@@ -20,6 +20,8 @@
 include('DbConnect.php');
 include('RegisterFunctions.php');
 
+$date = date('D d M, Y H:i a');
+
 if(isset($_POST['register'])) {
     if(isset($_POST['user']) && isset($_POST['password'])) {
         $user = mysqli_real_escape_string($mysqli, $_POST['user']);
@@ -45,7 +47,8 @@ if(isset($_POST['register'])) {
             echo '<span style="color:red">'.$value.'</span>';
         }
     } else {
-        $sql = "INSERT INTO user(username, password) VALUES ('$user', '$password')";
+        $sql = "INSERT INTO user(username, password, registered_date, last_login_date)
+        VALUES ('$user', '$password', '$date', 'Not logged in yet.')";
         mysqli_query($mysqli, $sql);
         $message = "You've succesfully registered. ";
     }
