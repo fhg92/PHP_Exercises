@@ -64,20 +64,19 @@ function getFriendList($mysqli, $curUser)
 
 function getFriendRequest($mysqli, $curUser)
 {
-    // If current user is user_id in relation database and status = 0.
-    // Get friend request from user_two_id.
-    $sql = "SELECT user_one_id FROM relation WHERE status = 0 AND user_one_id != 
+    // If current user is user_two_id in relation database and status = 0.
+    // Get friend request from user_one_id.
+    $sql = "SELECT user_one_id FROM relation WHERE status = 0 AND user_two_id = 
     " .$curUser['user_id'];
     $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
     $request = mysqli_fetch_array($result);
-    //echo $request[0];
     
     $sql = "SELECT username FROM user WHERE user_id = '$request[0]'";
     $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
     $userId = mysqli_fetch_array($result);
     
     if(!empty($userId)) {
-        echo '<tr><td>'.$userId[0]. ' has send you a friend request. '.
+        echo '<tr><td>'.ucfirst(htmlentities($userId[0])). ' has send you a friend request. '.
             '<a href = "User.php?a=' . $request[0] . '"><button>Accept</button></a> '.
             '<a href = "User.php?d=' .  $request[0] . '"><button>Decline</button></a></td></tr>';
     } else {
@@ -97,7 +96,6 @@ function getFriendRequest($mysqli, $curUser)
         $userId = null;
         header('Location: User.php');
     }
-    
 }
 
 function addFriend($mysqli, $curUser, $otherUsers)

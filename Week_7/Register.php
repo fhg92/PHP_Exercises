@@ -48,8 +48,10 @@ if(isset($_POST['register'])) {
         }
     } else {
         $sql = "INSERT INTO user(username, password, registered_date, last_login_date)
-        VALUES ('$user', '$password', '$date', 'Not logged in yet.')";
-        mysqli_query($mysqli, $sql);
+        VALUES (?, ?, ?, 'Not logged in yet.')";
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param('sss', $user, $password, $date);
+        $stmt->execute();
         $message = "You've succesfully registered. ";
     }
 }
