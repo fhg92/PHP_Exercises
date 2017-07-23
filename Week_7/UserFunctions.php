@@ -31,16 +31,30 @@ function getFriendList($mysqli, $curUser)
     
     foreach($relations as $user) {
         if($user[0] == $curUser['user_id']) {
-            $sql = "SELECT username FROM user WHERE user_id = " .$user[1];
+            $sql = "SELECT username, user_id FROM user WHERE user_id = " .$user[1];
             $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
             $friend = mysqli_fetch_assoc($result);
-            echo '<tr><td>'.$friend['username'].'</td></tr>';
+            echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).' <a href = "User.php?r='
+            . $friend['user_id'] . '"><button>Delete</button></a></td></tr>';
         } 
         if($user[1] == $curUser['user_id']) {
-            $sql = "SELECT username FROM user WHERE user_id = " .$user[0];
+            $sql = "SELECT username, user_id FROM user WHERE user_id = " .$user[0];
             $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
             $friend = mysqli_fetch_assoc($result);
-            echo '<tr><td>'.$friend['username'].'</td></tr>';
+            echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).' <a href = "User.php?r='
+            . $friend['user_id'] . '"><button>Delete</button></a></td></tr>';
+        }
+        if(isset($_GET['r']) && $_GET['r'] == $friend['user_id']) {
+            if($user[0] == $curUser['user_id']) {
+                $sql = "DELETE FROM relation WHERE user_one_id = ".$curUser['user_id']."
+                AND user_two_id = ".$friend['user_id'];
+            }
+            if($user[1] == $curUser['user_id']) {
+                $sql = "DELETE FROM relation WHERE user_two_id = ".$curUser['user_id']."
+                AND user_one_id = ".$friend['user_id'];
+            }
+            mysqli_query($mysqli, $sql);
+            header('Location: User.php');
         }
     }
     if(!isset($friend)){
@@ -63,19 +77,25 @@ function getFriendRequest($mysqli, $curUser)
     $userId = mysqli_fetch_array($result);
     
     if(!empty($userId)) {
-        echo $userId[0]. ' has send you a friend request. '.
+        echo '<tr><td>'.$userId[0]. ' has send you a friend request. '.
             '<a href = "User.php?a=' . $request[0] . '"><button>Accept</button></a> '.
-            '<a href = "User.php?d=' .  $request[0] . '"><button>Decline</button></a>';
+            '<a href = "User.php?d=' .  $request[0] . '"><button>Decline</button></a></td></tr>';
+    } else {
+        echo 'There are no new friend requests.';
     }
     // If request accepted.
     if(isset($_GET['a']) && $_GET['a'] == $request[0]) {
         $sql = "UPDATE relation SET status = '1' WHERE user_two_id = " . $curUser['user_id'];
         mysqli_query($mysqli, $sql);
+        $userId = null;
+        header('Location: User.php');
     }
     // If request declined.
     if(isset($_GET['d']) && $_GET['d'] == $request[0]) {
         $sql = "UPDATE relation SET status = '2' WHERE user_two_id = " . $curUser['user_id'];
         mysqli_query($mysqli, $sql);
+        $userId = null;
+        header('Location: User.php');
     }
     
 }

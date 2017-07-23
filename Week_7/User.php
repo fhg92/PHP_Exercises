@@ -25,9 +25,9 @@ if(!isset($_SESSION['user'])) {
             } else{
                 echo 'There are no other registered users yet.';
             }
-            echo '</table><p><b>Friends:</b></p>';
+            echo '</table><p><b>Friends requests:</b></p><table>';
             getFriendRequest($mysqli, $curUser);
-            echo '<table>';
+            echo '</table><p><b>Friends:</b></p><table>';
             getFriendList($mysqli, $curUser);
             echo '</table>';
             ?>
