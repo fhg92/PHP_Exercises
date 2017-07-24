@@ -43,36 +43,37 @@ function getFriendList($mysqli, $curUser)
     $relations = $stmt->get_result()->fetch_all();
     $stmt->close();
     
-    foreach($relations as $user) {
+    foreach($relations as $user) {  
+        $sql = 'SELECT username, user_id FROM user WHERE user_id = ?';
+        $stmt = $mysqli->prepare($sql);
         if($user[0] == $curUser['user_id']) {
-            $sql = "SELECT username, user_id FROM user WHERE user_id = " .$user[1];
-            $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
-            $friend = mysqli_fetch_assoc($result);
-            echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).' <a href = "User.php?r='
-            . $friend['user_id'] . '"><button>Delete</button></a></td></tr>';
-        } 
+            $stmt->bind_param('i', $user[1]);
+        }
         if($user[1] == $curUser['user_id']) {
-            $sql = "SELECT username, user_id FROM user WHERE user_id = " .$user[0];
-            $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
-            $friend = mysqli_fetch_assoc($result);
-            echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).' <a href = "User.php?r='
-            . $friend['user_id'] . '"><button>Delete</button></a></td></tr>';
+            $stmt->bind_param('i', $user[0]);
         }
-        if(isset($_GET['r']) && $_GET['r'] == $friend['user_id']) {
-            if($user[0] == $curUser['user_id']) {
-                $sql = "DELETE FROM relation WHERE user_one_id = ".$curUser['user_id']."
-                AND user_two_id = ".$friend['user_id'];
-            }
-            if($user[1] == $curUser['user_id']) {
-                $sql = "DELETE FROM relation WHERE user_two_id = ".$curUser['user_id']."
-                AND user_one_id = ".$friend['user_id'];
-            }
-            mysqli_query($mysqli, $sql);
-            header('Location: User.php');
+        $stmt->execute();
+        $friend = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).' <a href = 
+        "User.php?r='. $friend['user_id'] . '"><button>Delete</button></a></td></tr>';
+    }
+    
+    if(isset($_GET['r']) && $_GET['r'] == $friend['user_id']) {
+        $sql= 'DELETE FROM relation WHERE user_one_id = ? AND user_two_id = ?';
+        $stmt = $mysqli->prepare($sql);
+        if($user[0] == $curUser['user_id']) {
+            $stmt->bind_param('ii', $curUser['user_id'], $friend['user_id']);
         }
+        if($user[1] == $curUser['user_id']) {
+            $stmt->bind_param('ii', $friend['user_id'], $curUser['user_id']);
+        }
+        $stmt->execute();
+        $stmt->close();
+        header('Location: User.php');
     }
     if(!isset($friend)){
-        echo "You don't have any friends in your friendlist yet.";
+    echo "You don't have any friends in your friendlist yet.";
     }
 } 
 
@@ -80,14 +81,20 @@ function getFriendRequest($mysqli, $curUser)
 {
     // If current user is user_two_id in relation database and status = 0.
     // Get friend request from user_one_id.
-    $sql = "SELECT user_one_id FROM relation WHERE status = 0 AND user_two_id = 
-    " .$curUser['user_id'];
-    $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
-    $request = mysqli_fetch_array($result);
+    $sql = 'SELECT user_one_id FROM relation WHERE status = ? AND user_two_id = ?';
+    $stmt = $mysqli->prepare($sql);
+    $i = 0;
+    $stmt->bind_param('ii', $i, $curUser['user_id']);
+    $stmt->execute();
+    $request = $stmt->get_result()->fetch_array();
+    $stmt->close();
     
-    $sql = "SELECT username FROM user WHERE user_id = '$request[0]'";
-    $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
-    $userId = mysqli_fetch_array($result);
+    $sql = 'SELECT username FROM user WHERE user_id = ?';
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('i', $request[0]);
+    $stmt->execute();
+    $userId = $stmt->get_result()->fetch_array();
+    $stmt->close();
     
     if(!empty($userId)) {
         echo '<tr><td>'.ucfirst(htmlentities($userId[0])). ' has send you a friend request. '.
@@ -97,20 +104,25 @@ function getFriendRequest($mysqli, $curUser)
         echo 'There are no new friend requests.';
     }
     // If request accepted.
-    if(isset($_GET['a']) && $_GET['a'] == $request[0]) {
-        $sql = "UPDATE relation SET status = '1' WHERE user_two_id = " . $curUser['user_id'];
-        mysqli_query($mysqli, $sql);
-        $userId = null;
-        header('Location: User.php');
-    }
-    // If request declined.
-    if(isset($_GET['d']) && $_GET['d'] == $request[0]) {
-        $sql = "UPDATE relation SET status = '2' WHERE user_two_id = " . $curUser['user_id'];
-        mysqli_query($mysqli, $sql);
+    if(isset($_GET['a']) or isset($_GET['d'])) {
+        $sql = 'UPDATE relation SET status = ? WHERE user_two_id = ?';
+        $stmt = $mysqli->prepare($sql);
+        // If friend request accepted.
+        if($_GET['a'] == $request[0]) {
+            $i = 1;
+        }
+        // If friend request declined.
+        if($_GET['d'] == $request[0]) {
+            $i = 2;
+        }
+        $stmt->bind_param('ii', $i, $curUser['user_id']);
+        $stmt->execute();
+        $stmt->close();
         $userId = null;
         header('Location: User.php');
     }
 }
+
 
 function addFriend($mysqli, $curUser, $otherUsers)
 {
@@ -120,13 +132,17 @@ function addFriend($mysqli, $curUser, $otherUsers)
         
         if(isset($_GET['add']) && $_GET['add'] == $user[0]) {
             // Current user.
-            $currentId = mysqli_real_escape_string($mysqli, $curUser['user_id']);
+            $currentId = $mysqli->real_escape_string($curUser['user_id']);
         
             // User to add as friend.
-            $userTwoId = mysqli_real_escape_string($mysqli, $user[0]);
+            $userTwoId = $mysqli->real_escape_string($user[0]);
         
-            $sql = "INSERT INTO relation(user_one_id, user_two_id, status) VALUES ('$currentId', '$userTwoId', '0')";
-            mysqli_query($mysqli, $sql);
+            $sql = "INSERT INTO relation(user_one_id, user_two_id, status) VALUES (?, ?, ?)";
+            $stmt = $mysqli->prepare($sql);
+            $i = 0;
+            $stmt->bind_param('iii', $currentId, $userTwoId, $i);
+            $stmt->execute();
+            $stmt->close();
         }
     }
 }
