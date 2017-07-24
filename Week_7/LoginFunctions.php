@@ -14,12 +14,14 @@ function checkUser(&$error) {
     return true;
 }
 
-function checkUserDb($mysqli, &$error) {
-    $user = mysqli_real_escape_string($mysqli, $_POST['user']);
-    $select = "SELECT username FROM user WHERE username = '$user'";
-    $result = mysqli_query($mysqli, $select);
+function checkUserDb($mysqli, &$error, &$user) {
+    $user = $mysqli->real_escape_string($_POST['user']);
+    $sql = "SELECT username FROM user WHERE username = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s',$user);
+    $stmt->execute();
     if($_POST['user'] != null && $_POST['password'] != null) {
-        if(mysqli_num_rows($result) == 0) {
+        if($stmt->num_rows() == 0) {
             $error = 'Login failed.<br>'.PHP_EOL;
             return false;
         }
@@ -56,12 +58,14 @@ function checkPass(&$error) {
     }
 }
 
-function checkPassDb($mysqli, &$dbPassword, &$error) {
-    $user = mysqli_real_escape_string($mysqli, $_POST['user']);
-    $selectPwd = "SELECT password FROM user WHERE username = '$user'";
-    $dbPassword = mysqli_query($mysqli, $selectPwd);
+function checkPassDb($mysqli, &$dbPassword, &$error, $user) {
+    $sql = "SELECT password FROM user WHERE username = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s',$user);
+    $stmt->execute();
+    $dbPassword = $stmt->get_result();
     if($_POST['user'] != null && $_POST['password'] != null) {
-        if(mysqli_num_rows($dbPassword) == 0) {
+        if($stmt->num_rows() == 0) {
             $error = 'Login failed.<br>'.PHP_EOL;
             return false;
         }
@@ -70,9 +74,9 @@ function checkPassDb($mysqli, &$dbPassword, &$error) {
 }
 
 function logIn($mysqli, $dbPassword, &$error) {
-    $password = mysqli_real_escape_string($mysqli, $_POST['password']);
-    
-    while($row = mysqli_fetch_assoc($dbPassword)) {
+    $password = $mysqli->real_escape_string($_POST['password']);
+
+    while($row = $dbPassword->fetch_assoc()) {
         $passresult = $row;
     }
     
@@ -87,8 +91,10 @@ function logIn($mysqli, $dbPassword, &$error) {
         $_SESSION['user'] = $_POST['user'];
         $user = $_SESSION['user'];
         $date = date('D d M, Y H:i a');
-        $sql = "UPDATE user SET last_login_date = '$date' WHERE username ='$user'";
-        mysqli_query($mysqli, $sql);
+        $sql = "UPDATE user SET last_login_date = ? WHERE username = ?";
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param('ss', $date, $user);
+        $stmt->execute();
         header('Location: User.php');
     } else {
         $error = 'Login failed.<br>'.PHP_EOL;

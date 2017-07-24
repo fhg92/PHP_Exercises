@@ -1,6 +1,7 @@
 <?php
 
-function checkUser(&$error) {
+function checkUser(&$error)
+{
     switch($_POST['user']) {
         case null:
             $error[] = "Don't forget to fill in a username.<br>".PHP_EOL;
@@ -15,16 +16,20 @@ function checkUser(&$error) {
 }
 
 function checkUserDb($mysqli, $user, &$error) {
-    $select = "SELECT username FROM user WHERE username = '$user'";
-    $result = mysqli_query($mysqli, $select);
-    if(mysqli_num_rows($result) > 0) {
+    $sql = "SELECT username FROM user WHERE username = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s',$user);
+    $stmt->execute();
+    $stmt->store_result();
+    if($stmt->num_rows > 0) {
         $error[] = 'Username already exists.<br>'.PHP_EOL;
         return false;
     }
     return true;
 }
 
-function checkPass(&$error) {
+function checkPass(&$error)
+{
     if(isset($_POST['password'])) { 
          switch($_POST['password']) {
             case null:
@@ -52,6 +57,14 @@ function checkPass(&$error) {
          }
         return true;
     }
+}
+
+function insert($mysqli, $user, $password, $date) {
+    $sql = "INSERT INTO user(username, password, registered_date, last_login_date)
+    VALUES (?, ?, ?, 'Not logged in yet.')";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('sss', $user, $password, $date);
+    $stmt->execute();
 }
 
 ?>

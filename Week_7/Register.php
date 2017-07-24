@@ -24,36 +24,29 @@ $date = date('D d M, Y H:i a');
 
 if(isset($_POST['register'])) {
     if(isset($_POST['user']) && isset($_POST['password'])) {
-        $user = mysqli_real_escape_string($mysqli, $_POST['user']);
-        $password = mysqli_real_escape_string($mysqli, $_POST['password']);
+        $user = $mysqli->real_escape_string($_POST['user']);
+        $password = $mysqli->real_escape_string($_POST['password']);
         $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
     }
     
-    checkUser($error);
-    checkUserDb($mysqli, $user, $error);
-    checkPass($error);
+    echo '<br>';
     
     if(checkUser($error) == true) {
         checkUserDb($mysqli, $user, $error);
     }
     
-    /*if(checkPass($error) == true) {
-        checkPassDb($mysqli, $dbPassword, $error);
-        logIn($mysqli, $dbPassword, $error);
-    }*/
+    checkPass($error);
     
     if(isset($error)) {
+        echo '<br>';
         foreach($error as $key => $value) {
             echo '<span style="color:red">'.$value.'</span>';
         }
     } else {
-        $sql = "INSERT INTO user(username, password, registered_date, last_login_date)
-        VALUES (?, ?, ?, 'Not logged in yet.')";
-        $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param('sss', $user, $password, $date);
-        $stmt->execute();
+        insert($mysqli, $user, $password, $date);
         $message = "You've succesfully registered. ";
     }
+    echo '</div>';
 }
 
 ?>

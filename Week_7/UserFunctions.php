@@ -2,19 +2,29 @@
 
 function userCheck($mysqli, &$user, &$curUser, &$otherUsers)
 {
-    $user = $_SESSION['user'];
-    $query = "SELECT * FROM user WHERE username != '$user'";
-    $getInfo = mysqli_query($mysqli, $query);
+    $user = $mysqli->real_escape_string($_SESSION['user']);
+    
+    $sql = 'SELECT * FROM user WHERE username != ?';
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s', $user);
+    $stmt->execute();
+    $stmt->close();
     
     // Select user_id from current user.
-    $sql = 'SELECT user_id FROM user WHERE username = "' . mysqli_real_escape_string($mysqli, $user) . '"';
-    $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
-    $curUser = mysqli_fetch_assoc($result);
+    $sql = 'SELECT user_id FROM user WHERE username = ?';
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s', $user);
+    $stmt->execute();
+    $curUser = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
     
-    $sql = "SELECT * FROM user WHERE user_id != " .$curUser['user_id'];
-    $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
-    $otherUsers = mysqli_fetch_all($result);
-        
+    $sql = 'SELECT * FROM user WHERE user_id != ?';
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s', $curUser['user_id']);
+    $stmt->execute();
+    $otherUsers = $stmt->get_result()->fetch_all();
+    $stmt->close();
+    
     if(!empty($otherUsers)) {
         return true;
     } else {
@@ -25,9 +35,13 @@ function userCheck($mysqli, &$user, &$curUser, &$otherUsers)
 function getFriendList($mysqli, $curUser)
 {   
     // Get ID from user_one_id and user_two_id.
-    $sql = "SELECT user_one_id, user_two_id FROM relation WHERE status = 1";
-    $result = mysqli_query($mysqli, $sql) or die('Error connecting to database');
-    $relations = mysqli_fetch_all($result);
+    $sql = 'SELECT user_one_id, user_two_id FROM relation WHERE status = ?';
+    $stmt = $mysqli->prepare($sql);
+    $i = 1;
+    $stmt->bind_param('i', $i);
+    $stmt->execute();
+    $relations = $stmt->get_result()->fetch_all();
+    $stmt->close();
     
     foreach($relations as $user) {
         if($user[0] == $curUser['user_id']) {
