@@ -4,11 +4,12 @@ function userCheck($mysqli, &$user, &$curUser, &$otherUsers)
 {
     $user = $mysqli->real_escape_string($_SESSION['user']);
     
-    $sql = 'SELECT * FROM user WHERE username != ?';
+    // Select all from all users except the current user.
+    /*$sql = 'SELECT * FROM user WHERE username != ?';
     $stmt = $mysqli->prepare($sql);
     $stmt->bind_param('s', $user);
     $stmt->execute();
-    $stmt->close();
+    $stmt->close();*/
     
     // Select user_id from current user.
     $sql = 'SELECT user_id FROM user WHERE username = ?';
@@ -43,20 +44,22 @@ function getFriendList($mysqli, $curUser)
     $relations = $stmt->get_result()->fetch_all();
     $stmt->close();
     
-    foreach($relations as $user) {  
-        $sql = 'SELECT username, user_id FROM user WHERE user_id = ?';
-        $stmt = $mysqli->prepare($sql);
-        if($user[0] == $curUser['user_id']) {
-            $stmt->bind_param('i', $user[1]);
+    foreach($relations as $user) {
+        if($user[0] == $curUser['user_id'] OR $user[1] == $curUser['user_id']) {
+            $sql = 'SELECT username, user_id FROM user WHERE user_id = ?';
+            $stmt = $mysqli->prepare($sql);
+            if($user[0] == $curUser['user_id']) {
+                $stmt->bind_param('i', $user[1]);
+            }
+            if($user[1] == $curUser['user_id']) {
+                $stmt->bind_param('i', $user[0]);
+            }
+            $stmt->execute();
+            $friend = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).' <a href = 
+            "User.php?r='. $friend['user_id'] . '"><button>Delete</button></a></td></tr>';
         }
-        if($user[1] == $curUser['user_id']) {
-            $stmt->bind_param('i', $user[0]);
-        }
-        $stmt->execute();
-        $friend = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
-        echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).' <a href = 
-        "User.php?r='. $friend['user_id'] . '"><button>Delete</button></a></td></tr>';
     }
     
     if(isset($_GET['r']) && $_GET['r'] == $friend['user_id']) {
