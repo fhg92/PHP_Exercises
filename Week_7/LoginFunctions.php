@@ -7,22 +7,22 @@ function checkUser(&$error) {
             return false;
             break;
         case strlen($_POST['user']) < 3:
-            $error = 'Login failed.<br>'.PHP_EOL;
+            // Username is shorter than 3 characters.
             return false;
             break;
         }
     return true;
 }
 
-function checkUserDb($mysqli, &$error, &$user) {
-    $user = $mysqli->real_escape_string($_POST['user']);
-    $sql = "SELECT username FROM user WHERE username = ?";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param('s',$user);
+function checkUserDb($pdo, &$error) {
+    $sql = 'SELECT username FROM user WHERE username = :user';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':user', $_POST['user'], PDO::PARAM_STR);
     $stmt->execute();
+    $rowCount = $stmt->fetchColumn();
     if($_POST['user'] != null && $_POST['password'] != null) {
-        if($stmt->num_rows() == 0) {
-            $error = 'Login failed.<br>'.PHP_EOL;
+        if($rowCount == 0) {
+            // Username doesn't exist.
             return false;
         }
         return true;
@@ -37,20 +37,16 @@ function checkPass(&$error) {
                  return false;
                  break;
              case strlen($_POST['password']) < 6:
-                 $error = 'Login failed.<br>'.PHP_EOL;
                  return false;
                  break;
              case !preg_match('/[A-Z]/', $_POST['password']):
-                 $error = 'Login failed.<br>'.PHP_EOL;
                  return false;
                  break;
              case !preg_match('/[0-9]/', $_POST['password']):
-                 $error = 'Login failed.<br>'.PHP_EOL;
                  return false;
                  break;
              case !preg_match('/[\'\/~`\!@#\$%\^&\*\(\)_\-\+=\{\}\[\]\|;:"\<\>,\.\?\\\]/',
                              $_POST['password']):
-                 $error = 'Login failed.<br>'.PHP_EOL;
                  return false;
                  break;
          }
@@ -58,42 +54,31 @@ function checkPass(&$error) {
     }
 }
 
-function checkPassDb($mysqli, &$dbPassword, &$error, $user) {
-    $sql = "SELECT password FROM user WHERE username = ?";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param('s',$user);
+function checkPassDb($pdo, &$hash, &$error) {
+    $sql = "SELECT password FROM user WHERE username = :user";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':user', $_POST['user'], PDO::PARAM_STR);
     $stmt->execute();
-    $dbPassword = $stmt->get_result();
+    $hash = $stmt->fetchColumn();
     if($_POST['user'] != null && $_POST['password'] != null) {
-        if($stmt->num_rows() == 0) {
-            $error = 'Login failed.<br>'.PHP_EOL;
+        if($hash == 0) {
+            // Password hash doesn't exist in database.
             return false;
         }
         return true;
     }
 }
 
-function logIn($mysqli, $dbPassword, &$error) {
-    $password = $mysqli->real_escape_string($_POST['password']);
-
-    while($row = $dbPassword->fetch_assoc()) {
-        $passresult = $row;
-    }
-    
-    if(isset($passresult)) {
-        $hash = $passresult['password'];
-    } else {
-        $hash = null;
-    }
+function logIn($pdo, $hash, &$error) {
+    $password = $_POST['password'];
     
     if(password_verify($password, $hash) && $_POST['password'] != null) {
         session_start();  
         $_SESSION['user'] = $_POST['user'];
-        $user = $_SESSION['user'];
-        $date = date('D d M, Y H:i a');
-        $sql = "UPDATE user SET last_login_date = ? WHERE username = ?";
-        $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param('ss', $date, $user);
+        $sql = 'UPDATE user SET last_login_date = :date WHERE username = :user';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':date', date('D d M, Y H:i a'), PDO::PARAM_STR);
+        $stmt->bindParam(':user', $_SESSION['user'], PDO::PARAM_STR);
         $stmt->execute();
         header('Location: User.php');
     } else {

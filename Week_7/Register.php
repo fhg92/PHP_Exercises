@@ -19,38 +19,28 @@
 
 include('DbConnect.php');
 include('RegisterFunctions.php');
+            
+echo '<br>';
 
-$date = date('D d M, Y H:i a');
-
-if(isset($_POST['register'])) {
-    if(isset($_POST['user']) && isset($_POST['password'])) {
-        $user = $mysqli->real_escape_string($_POST['user']);
-        $password = $mysqli->real_escape_string($_POST['password']);
-        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-    }
-    
-    echo '<br>';
-    
-    if(checkUser($error) == true) {
-        checkUserDb($mysqli, $user, $error);
-    }
-    
-    checkPass($error);
-    
-    if(isset($error)) {
-        echo '<br>';
-        foreach($error as $key => $value) {
-            echo '<span style="color:red">'.$value.'</span>';
-        }
-    } else {
-        insert($mysqli, $user, $password, $date);
-        $message = "You've succesfully registered. ";
-    }
-    echo '</div>';
+if(isset($_POST['user']) && checkUser($error) == true) {
+    checkUserDb($pdo, $user, $error);
 }
 
-?>
-            
+checkPass($error);
+    
+if(isset($error)) {
+    echo '<br>';
+    foreach($error as $key => $value) {
+        echo '<span style="color:red">'.$value.'</span>';
+    }
+} else {
+    if(insert($pdo) == true) {
+        $message = "You've succesfully registered. ";
+    }
+}
+echo '</div>';
+
+?>    
         </form>
         <a href='Login.php'>
             <?php 

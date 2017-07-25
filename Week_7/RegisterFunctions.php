@@ -15,13 +15,13 @@ function checkUser(&$error)
     return true;
 }
 
-function checkUserDb($mysqli, $user, &$error) {
-    $sql = "SELECT username FROM user WHERE username = ?";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param('s',$user);
+function checkUserDb($pdo, $user, &$error) {
+    $sql = "SELECT username FROM user WHERE username = :user";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':user', $_POST['user'], PDO::PARAM_STR);
     $stmt->execute();
-    $stmt->store_result();
-    if($stmt->num_rows > 0) {
+    $rowCount = $stmt->fetchColumn();
+    if($rowCount > 0) {
         $error[] = 'Username already exists.<br>'.PHP_EOL;
         return false;
     }
@@ -30,7 +30,7 @@ function checkUserDb($mysqli, $user, &$error) {
 
 function checkPass(&$error)
 {
-    if(isset($_POST['password'])) { 
+    if(isset($_POST['submit'])) { 
          switch($_POST['password']) {
             case null:
                 $error[] = "Don't forget to fill in a password.<br>".PHP_EOL;
@@ -59,12 +59,22 @@ function checkPass(&$error)
     }
 }
 
-function insert($mysqli, $user, $password, $date) {
-    $sql = "INSERT INTO user(username, password, registered_date, last_login_date)
-    VALUES (?, ?, ?, 'Not logged in yet.')";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param('sss', $user, $password, $date);
-    $stmt->execute();
+function insert($pdo) {
+    if(isset($_POST['user']) && isset($_POST['password'])) {
+        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $date = date('D d M, Y H:i a');
+        $lastLogin = 'Not logged in yet.';
+        $sql = "INSERT INTO user(username, password, registered_date, last_login_date)
+        VALUES (:user, :pass, :registered, :lastLogin)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':user', $_POST['user'], PDO::PARAM_STR);
+        $stmt->bindParam(':pass', $password, PDO::PARAM_STR);
+        $stmt->bindParam(':registered', $date, PDO::PARAM_STR);
+        $stmt->bindParam(':lastLogin', $lastLogin, PDO::PARAM_STR);
+        $stmt->execute();
+        return true;
+    }
+    return false;
 }
 
 ?>

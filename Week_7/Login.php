@@ -20,12 +20,12 @@ include('LoginFunctions.php');
 if(isset($_POST['login'])) {
     
     if(checkUser($error) == true) {
-        checkUserDb($mysqli, $error, $user);
+        checkUserDb($pdo, $error);
     }
     
     if(checkPass($error) == true) {
-        checkPassDb($mysqli, $dbPassword, $error, $user);
-        logIn($mysqli, $dbPassword, $error);
+        checkPassDb($pdo, $hash, $error);
+        logIn($pdo, $hash, $error);
     }
     
     if(isset($error)) {
