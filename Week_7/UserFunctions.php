@@ -100,31 +100,31 @@ function getFriendRequest($pdo, $curUser)
         $request = $stmt->fetch();
         
         if(!empty($request)) {
-            echo '<tr><td>'.ucfirst(htmlentities($request[0])). ' has send you a friend request'.
+            echo '<form method="post"><tr><td>'.ucfirst(htmlentities($request[0])). ' has send you a friend request'.
             " <button type='submit' name='accept' value='".$req['user_one_id']."'>Accept</button>
             <button type='submit' name='decline' value='".$req['user_one_id']."'>Decline</button>
-            </td></tr>";
+            </td></tr></form>";
         }
-        // ACCEPTING/DECLINING NOT WORKING YET. UNDER CONSTRUCTION.
-        if(isset($_POST['accept']) or isset($_POST['decline'])) {
-            $sql = 'UPDATE relation SET status = :status WHERE user_one_id = :id1
-            AND user_two_id = :id2';
-            $stmt = $pdo->prepare($sql);
-            // If friend request accepted.
-            if($_POST['accept'] == $req['user_one_id']) {
-                $i = 1;
-            }
-            // If friend request declined.
-            if($_POST['decline'] == $req['user_one_id']) {
+    }
+    
+    if(isset($_POST['accept']) or isset($_POST['decline'])) {
+        $sql = 'UPDATE relation SET status = :status WHERE user_one_id = :id1
+        AND user_two_id = :id2';
+        $stmt = $pdo->prepare($sql);
+        // If friend request accepted.
+        if($_POST['accept'] == $req['user_one_id']) {
+            $i = 1;
+        }
+        // If friend request declined.
+        if($_POST['decline'] == $req['user_one_id']) {
             $i = 2;
-            }
-            $stmt->bindParam(':status', $i, PDO::PARAM_INT);
-            $stmt->bindParam(':id1', $req['user_one_id'], PDO::PARAM_INT);
-            $stmt->bindParam(':id2', $curUser['user_id'], PDO::PARAM_INT);
-            $stmt->execute();
-            $userId = null;
-            header('Location: User.php');
         }
+        $stmt->bindParam(':status', $i, PDO::PARAM_INT);
+        $stmt->bindParam(':id1', $req['user_one_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':id2', $curUser['user_id'], PDO::PARAM_INT);
+        $stmt->execute();
+        $userId = null;
+        header('Location: User.php');
     }
     if(empty($request)) {
         echo 'There are no new friend requests.';
