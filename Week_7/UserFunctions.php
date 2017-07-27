@@ -90,47 +90,52 @@ function getFriendRequest($pdo, $curUser)
     $stmt->bindParam(':id', $curUser['user_id'], PDO::PARAM_INT);
     $stmt->execute();
     $request = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    //var_dump($request);
     
-    foreach($request as $req){
+    foreach($request as $req) {
         $sql = 'SELECT username FROM user WHERE user_id = :id';
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id', $req['user_one_id'], PDO::PARAM_INT);
         $stmt->execute();
-        $request = $stmt->fetch();
+        $name = $stmt->fetch();
         
-        if(!empty($request)) {
-            echo '<form method="post"><tr><td>'.ucfirst(htmlentities($request[0])). ' has send you a friend request'.
-            " <button type='submit' name='accept' value='".$req['user_one_id']."'>Accept</button>
-            <button type='submit' name='decline' value='".$req['user_one_id']."'>Decline</button>
-            </td></tr></form>";
+        if(!empty($name)) {
+            echo '<form method="post"><tr><td>'.ucfirst(htmlentities($name[0])). 
+                ' has send you a friend request'.
+                " <button type='submit' name='accept' value='".$req['user_one_id'].
+                "'>Accept</button>
+                <button type='submit' name='decline' value='".$req['user_one_id'].
+                "'>Decline</button>
+                </td></tr></form>";
         }
     }
     
-    if(isset($_POST['accept']) or isset($_POST['decline'])) {
-        $sql = 'UPDATE relation SET status = :status WHERE user_one_id = :id1
-        AND user_two_id = :id2';
-        $stmt = $pdo->prepare($sql);
-        // If friend request accepted.
-        if($_POST['accept'] == $req['user_one_id']) {
-            $i = 1;
+    if(!empty($request) && isset($_POST['accept']) or isset($_POST['decline'])) {
+        foreach($_POST as $value) {
+            if(isset($_POST['accept']) or isset($_POST['decline'])) {
+                if($_POST['accept'] == $value) {
+                    $i = 1;
+                }
+                // If friend request declined.
+                if($_POST['decline'] == $value) {
+                    $i = 2;
+                }
+            }
+            
+            $sql = 'UPDATE relation SET status = :status WHERE user_one_id = :id1
+            AND user_two_id = :id2';
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':status', $i, PDO::PARAM_INT);
+            $stmt->bindParam(':id1', $value, PDO::PARAM_INT);
+            $stmt->bindParam(':id2', $curUser['user_id'], PDO::PARAM_INT);
+            $stmt->execute();
+            $userId = null;
+            header('Location: User.php');
         }
-        // If friend request declined.
-        if($_POST['decline'] == $req['user_one_id']) {
-            $i = 2;
-        }
-        $stmt->bindParam(':status', $i, PDO::PARAM_INT);
-        $stmt->bindParam(':id1', $req['user_one_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':id2', $curUser['user_id'], PDO::PARAM_INT);
-        $stmt->execute();
-        $userId = null;
-        header('Location: User.php');
     }
     if(empty($request)) {
         echo 'There are no new friend requests.';
     }
 }
-
 
 function addFriend($pdo, $curUser, $otherUsers)
 {
