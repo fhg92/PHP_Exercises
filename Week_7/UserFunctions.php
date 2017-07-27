@@ -1,5 +1,4 @@
 <?php
-
 function userCheck($pdo, &$curUser, &$otherUsers)
 {    
     // Select user_id from current user.
@@ -11,7 +10,7 @@ function userCheck($pdo, &$curUser, &$otherUsers)
     
     // If the current username from database is different from the user session,
     // redirect to login page.
-    if($curUser['username'] != $_SESSION['user']){
+    if($curUser['username'] != $_SESSION['user'] or $curUser['username'] == null) {
         header('Location: Login.php');
     }
     
@@ -27,7 +26,6 @@ function userCheck($pdo, &$curUser, &$otherUsers)
         return false;
     }
 }
-
 function getFriendList($pdo, $curUser)
 {   
     // Get ID from user_one_id and user_two_id.
@@ -78,7 +76,6 @@ function getFriendList($pdo, $curUser)
         echo "You don't have any friends in your friendlist yet.";
     }
 } 
-
 function getFriendRequest($pdo, $curUser)
 {
     // If current user is user_two_id in relation database and status = 0.
@@ -112,6 +109,7 @@ function getFriendRequest($pdo, $curUser)
     if(!empty($request) && isset($_POST['accept']) or isset($_POST['decline'])) {
         foreach($_POST as $value) {
             if(isset($_POST['accept']) or isset($_POST['decline'])) {
+                // If friend request accepted.
                 if($_POST['accept'] == $value) {
                     $i = 1;
                 }
@@ -136,31 +134,52 @@ function getFriendRequest($pdo, $curUser)
         echo 'There are no new friend requests.';
     }
 }
-
-function addFriend($pdo, $curUser, $otherUsers)
+function getUserList($pdo, $curUser, $otherUsers)
 {
     echo "<form method='post'>";
     foreach($otherUsers as $user) {
-        echo '<tr><td>'.ucfirst(htmlentities($user['username'])).
-        " <button type='submit' name='add' value='".$user['user_id']."'>Add</button>
-        </td></tr>";
         
+        $sql = 'SELECT status FROM relation WHERE user_one_id = :u1 AND user_two_id = :u2';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':u1', $curUser['user_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':u2', $user['user_id'], PDO::PARAM_INT);
+        $stmt->execute();
+        // Status of sent requests.
+        $sent = $stmt->fetch();
+        
+        echo '<tr><td>'.ucfirst(htmlentities($user['username']));
+        
+        if(isset($sent[0])) {
+            if($sent[0] == 0 or $sent[0] == 2){
+                echo " <button type='submit' name='add' disabled value='"
+                    .$user['user_id']."'>Request sent</button></td></tr>";
+            }
+            if($sent[0] == 1) {
+                echo '';
+            }
+        }
+        
+        if(!isset($sent[0])) {
+            echo " <button type='submit' name='add' value='"
+                    .$user['user_id']."'>Add</button></td></tr>";
+        }   
+            
         if(isset($_POST['add'])) {
             foreach($_POST as $value) {
             // Status.
-            $i = 0;
+            $i = §0;
             
-            $sql = "INSERT INTO relation(user_one_id, user_two_id, status) VALUES
-            (:curId, :otherId, :status)";
+            $sql = 'INSERT INTO relation(user_one_id, user_two_id, status) VALUES
+            (:curId, :otherId, :status)';
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':curId', $curUser['user_id'], PDO::PARAM_INT);
             $stmt->bindParam(':otherId', $value, PDO::PARAM_INT);
             $stmt->bindParam(':status', $i, PDO::PARAM_INT);
             $stmt->execute();
             }
+            header('Location: User.php');
         }
     }
     echo '</form>';
 }
-
 ?>
