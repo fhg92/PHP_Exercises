@@ -97,7 +97,7 @@ function getFriendRequest($pdo, $curUser)
         
         if(!empty($name)) {
             echo '<form method="post"><tr><td>'.ucfirst(htmlentities($name[0])). 
-                ' has send you a friend request'.
+                ' has sent you a friend request'.
                 " <button type='submit' name='accept' value='".$req['user_one_id'].
                 "'>Accept</button>
                 <button type='submit' name='decline' value='".$req['user_one_id'].
@@ -112,15 +112,16 @@ function getFriendRequest($pdo, $curUser)
                 // If friend request accepted.
                 if($_POST['accept'] == $value) {
                     $i = 1;
+                    $sql = 'UPDATE relation SET status = :status WHERE user_one_id 
+                    = :id1 AND user_two_id = :id2';
                 }
                 // If friend request declined.
                 if($_POST['decline'] == $value) {
-                    $i = 2;
+                    $i = 0;
+                    $sql = 'DELETE FROM relation WHERE status = :status AND 
+                    user_one_id = :id1 AND user_two_id = :id2';
                 }
             }
-            
-            $sql = 'UPDATE relation SET status = :status WHERE user_one_id = :id1
-            AND user_two_id = :id2';
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':status', $i, PDO::PARAM_INT);
             $stmt->bindParam(':id1', $value, PDO::PARAM_INT);
@@ -147,27 +148,36 @@ function getUserList($pdo, $curUser, $otherUsers)
         // Status of sent requests.
         $sent = $stmt->fetch();
         
+        $sql = 'SELECT status FROM relation WHERE user_one_id = :u1 AND user_two_id = :u2';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':u1', $user['user_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':u2', $curUser['user_id'], PDO::PARAM_INT);
+        $stmt->execute();
+        // Status of received requests.
+        $rec = $stmt->fetch();
+        
         echo '<tr><td>'.ucfirst(htmlentities($user['username']));
         
-        if(isset($sent[0])) {
-            if($sent[0] == 0 or $sent[0] == 2){
-                echo " <button type='submit' name='add' disabled value='"
-                    .$user['user_id']."'>Request sent</button></td></tr>";
+        if(!isset($rec[0])) {
+            if(isset($sent[0])) {
+                if($sent[0] == 0 or $sent[0] == 2){
+                    echo " <button type='submit' name='add' disabled value='"
+                        .$user['user_id']."'>Request sent</button></td></tr>";
+                }
+                if($sent[0] == 1) {
+                    echo '';
+                }
             }
-            if($sent[0] == 1) {
-                echo '';
+            if(!isset($sent[0])) {
+                echo " <button type='submit' name='add' value='"
+                    .$user['user_id']."'>Add</button></td></tr>";
             }
         }
-        
-        if(!isset($sent[0])) {
-            echo " <button type='submit' name='add' value='"
-                    .$user['user_id']."'>Add</button></td></tr>";
-        }   
             
         if(isset($_POST['add'])) {
             foreach($_POST as $value) {
             // Status.
-            $i = §0;
+            $i = 0;
             
             $sql = 'INSERT INTO relation(user_one_id, user_two_id, status) VALUES
             (:curId, :otherId, :status)';
