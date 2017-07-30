@@ -7,7 +7,7 @@ include('include/FriendFunctions.php');
 
 <html>
     <head>
-        <title>Friends</title>
+        <title>Friends</title> 
     </head>
     <body>
         <div>
