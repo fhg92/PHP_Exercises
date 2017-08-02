@@ -17,8 +17,8 @@
         
 <?php
 
-include('DbConnect.php');
-include('RegisterFunctions.php');
+include('include/DbConnect.php');
+include('include/RegisterFunctions.php');
             
 echo '<br>';
 
