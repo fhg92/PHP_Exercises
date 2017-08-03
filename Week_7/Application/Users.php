@@ -1,7 +1,6 @@
 <?php
 include('include/Header.php');
 include('include/UserFunctions.php');
-include('include/UserSearch.php');
 ?>
 
 <html>
@@ -12,22 +11,25 @@ include('include/UserSearch.php');
 
 <div>
 <p><b>Search user:</b></p>
-<form method='post'>
+<form method='post' class='search'>
 <input type='text' name='search' placeholder='Search'/>
-<input type="submit" value="Submit" />
+<input type="submit" name='submit' value="Submit" />
 </form>
-<?php search($pdo); ?>
+    <?php 
+    if(userCheck($pdo, $curUser, $otherUsers) == true) {
+        searchUser($pdo, $curUser); 
+    }
+    ?>
 </div>
     <div>
-            <p><b>Users:</b></p>
-            <?php
-            echo '<table>';
-            if(userCheck($pdo, $curUser, $otherUsers) == true) {
-                getUserList($pdo, $curUser, $otherUsers);
-            } else{
-                echo 'There are no other registered users yet.';
-            }
-            ?>
+        <p><b>Users:</b></p>
+        <?php
+        if(userCheck($pdo, $curUser, $otherUsers) == true) {
+            getUserList($pdo, $curUser, $otherUsers);
+        } else {
+            echo 'There are no other registered users yet.';
+        }
+        ?>
         </div>
     </body>
 </html>

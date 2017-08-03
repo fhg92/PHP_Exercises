@@ -9,7 +9,7 @@ include('include/GroupFunctions.php');
     </head>
         <div>
             <p><b>Add group:</b></p>
-            <form method='post'>
+            <form method='post' class='search'>
                 <div>
                     <input type='text' name='group' placeholder='Group name'/>
                     <input type='submit' name='add' value='Add'/>

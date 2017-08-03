@@ -53,6 +53,7 @@ function getGroups($pdo, $curUser) {
     $stmt->execute();
     $groupId = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    echo "<form method='post'><table>";
     foreach($groupId as $row) {
         $sql = 'SELECT group_name FROM groups WHERE group_id = :groupId';
         $stmt = $pdo->prepare($sql);
@@ -61,16 +62,17 @@ function getGroups($pdo, $curUser) {
         $groupName = $stmt->fetch();
         
         if(!empty($groupName)) {
-            echo '<form method="post"><tr><td>'.ucfirst(htmlentities($groupName[0])). 
+            echo '<tr><td>'.ucfirst(htmlentities($groupName[0])). 
                 " <button type='submit' name='Leave' value='".$row['group_id'].
                 "'>Leave</button>
                 <button type='submit' name='Delete' value='".$row['group_id'].
                 "'>Delete</button>
-                </td></tr></form>";
+                </td></tr>";
         } else {
             echo "You're not in any group yet.";
         }
     }
+    echo '</table></form>';
 }
 
 ?>

@@ -10,8 +10,8 @@ function getFriendList($pdo, $curUser)
     $stmt->execute();
     $relations = $stmt->fetchAll();
     
+    echo "<form method='post'><table>";
     foreach($relations as $user) {
-        echo "<form method='post'>";
         if($user[0] == $curUser['user_id'] OR $user[1] == $curUser['user_id']) {
             $sql = 'SELECT username, user_id FROM user WHERE user_id = :id';
             $stmt = $pdo->prepare($sql);
@@ -27,7 +27,6 @@ function getFriendList($pdo, $curUser)
                 " <button type='submit' name='delete' value='".$friend['user_id'].
                 "'>Delete</button></td></tr>";
         }
-        echo '</form>';
     }
     
     if(isset($_POST['delete'])) {
@@ -47,8 +46,9 @@ function getFriendList($pdo, $curUser)
         }
     }
     if(!isset($friend)){
-        echo "<p>You don't have any friends in your friendlist yet.</p>";
+        echo "You don't have any friends in your friendlist yet.";
     }
+    echo '<table></form>';
 } 
 
 function getFriendRequest($pdo, $curUser)
@@ -63,23 +63,29 @@ function getFriendRequest($pdo, $curUser)
     $stmt->execute();
     $request = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    echo '<form method="post"><table>';
     foreach($request as $req) {
         $sql = 'SELECT username FROM user WHERE user_id = :id';
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id', $req['user_one_id'], PDO::PARAM_INT);
         $stmt->execute();
         $name = $stmt->fetch();
-        
+
         if(!empty($name)) {
-            echo '<form method="post"><tr><td>'.ucfirst(htmlentities($name[0])). 
-                ' has sent you a friend request'.
+            echo '<tr><td>'.ucfirst(htmlentities($name[0])). 
+                ' has sent you a friend request.'.
                 " <button type='submit' name='accept' value='".$req['user_one_id'].
                 "'>Accept</button>
                 <button type='submit' name='decline' value='".$req['user_one_id'].
                 "'>Decline</button>
-                </td></tr></form>";
+                </td></tr>";
         }
+    } 
+    
+    if(empty($request)) {
+        echo 'There are no new friend requests.';
     }
+    echo '</table></form>';
     
     if(!empty($request) && isset($_POST['accept']) or isset($_POST['decline'])) {
         foreach($_POST as $value) {
@@ -105,9 +111,6 @@ function getFriendRequest($pdo, $curUser)
             $userId = null;
             header('Location: Friends.php');
         }
-    }
-    if(empty($request)) {
-        echo '<p>There are no new friend requests.</p>';
     }
 }
 
