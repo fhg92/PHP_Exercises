@@ -81,8 +81,7 @@ function getFriendRequest($pdo, $curUser)
                 </td></tr>";
         }
     } 
-    
-    if(empty($request)) {
+    if(empty($request) or empty($name)) {
         echo 'There are no new friend requests.';
     }
     echo '</table></form>';

@@ -13,7 +13,6 @@ function checkUser(&$error) {
         }
     return true;
 }
-
 function checkUserDb($pdo, &$error) {
     $sql = 'SELECT username FROM user WHERE username = :user';
     $stmt = $pdo->prepare($sql);
@@ -28,7 +27,6 @@ function checkUserDb($pdo, &$error) {
         return true;
     }
 }
-
 function checkPass(&$error) {
     if(isset($_POST['password'])) { 
          switch($_POST['password']) {
@@ -53,7 +51,6 @@ function checkPass(&$error) {
         return true;
     }
 }
-
 function checkPassDb($pdo, &$hash, &$error) {
     $sql = "SELECT password FROM user WHERE username = :user";
     $stmt = $pdo->prepare($sql);
@@ -68,7 +65,6 @@ function checkPassDb($pdo, &$hash, &$error) {
         return true;
     }
 }
-
 function logIn($pdo, $hash, &$error) {
     $password = $_POST['password'];
     

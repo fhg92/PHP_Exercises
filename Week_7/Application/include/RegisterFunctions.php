@@ -1,5 +1,4 @@
 <?php
-
 function checkUser(&$error)
 {
     switch($_POST['user']) {
@@ -14,7 +13,6 @@ function checkUser(&$error)
         }
     return true;
 }
-
 function checkUserDb($pdo, $user, &$error) {
     $sql = "SELECT username FROM user WHERE username = :user";
     $stmt = $pdo->prepare($sql);
@@ -27,7 +25,6 @@ function checkUserDb($pdo, $user, &$error) {
     }
     return true;
 }
-
 function checkPass(&$error)
 {
     if(isset($_POST['submit'])) { 
@@ -58,23 +55,20 @@ function checkPass(&$error)
         return true;
     }
 }
-
 function insert($pdo) {
     if(isset($_POST['user']) && isset($_POST['password'])) {
         $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-        $date = date('D d M, Y H:i a');
+        $date = time();
         $lastLogin = 'Not logged in yet.';
-        $sql = "INSERT INTO user(username, password, registered_date, last_login_date)
-        VALUES (:user, :pass, :registered, :lastLogin)";
+        $sql = "INSERT INTO user(username, password, date_registered, last_login_date)
+        VALUES (:user, :pass, NOW(), :lastLogin)";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':user', $_POST['user'], PDO::PARAM_STR);
         $stmt->bindParam(':pass', $password, PDO::PARAM_STR);
-        $stmt->bindParam(':registered', $date, PDO::PARAM_STR);
         $stmt->bindParam(':lastLogin', $lastLogin, PDO::PARAM_STR);
         $stmt->execute();
         return true;
     }
     return false;
 }
-
 ?>

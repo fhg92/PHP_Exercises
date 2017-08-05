@@ -2,9 +2,7 @@
 
 include('include/Header.php');
 
-if(userCheck($pdo, $curUser, $otherUsers) == false) {
-    header('Location: Login.php');
-}
+userCheck($pdo, $curUser, $otherUsers);
 
 ?>
 

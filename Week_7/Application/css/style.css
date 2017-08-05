@@ -7,6 +7,10 @@ p, form, .search {
     padding-left: 1%;
 }
 
+tr {
+    padding-bottom: 10px;
+}
+
 .navbar {
     background-color: #0084b4;
     overflow: hidden;

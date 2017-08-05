@@ -2,8 +2,8 @@
 
 session_start();
 
-include('include/DbConnect.php');
-include('include/UserCheck.php');
+require('include/DbConnect.php');
+require('include/UserCheck.php');
 
 ?>
 

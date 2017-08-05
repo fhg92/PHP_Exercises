@@ -16,7 +16,6 @@
   
 include('include/DbConnect.php');
 include('include/LoginFunctions.php');
-
 if(isset($_POST['login'])) {
     
     if(checkUser($error) == true) {
@@ -32,7 +31,6 @@ if(isset($_POST['login'])) {
         echo '<span style="color:red">'.$error.'</span><br>';
     }
 }
-
 ?>
         
         <a href='Register.php'>Not registered? Click here to register.</a><br>

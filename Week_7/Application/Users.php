@@ -27,7 +27,7 @@ include('include/UserFunctions.php');
         if(userCheck($pdo, $curUser, $otherUsers) == true) {
             getUserList($pdo, $curUser, $otherUsers);
         } else {
-            echo 'There are no other registered users yet.';
+            echo '<p>There are no other registered users yet.</p>';
         }
         ?>
         </div>

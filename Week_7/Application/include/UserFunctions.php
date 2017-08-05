@@ -58,9 +58,10 @@ function searchUser($pdo, $curUser)
 {
     if(isset($_POST['search']) && strlen($_POST['search']) >= 3) {
     $search = $_POST['search'];
-    $sql = "SELECT user_id, username FROM user WHERE username LIKE '%$search%'";
+    $sql = 'SELECT user_id, username FROM user WHERE username LIKE :search AND username != :curUser';
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(1, '%$search%', PDO::PARAM_STR);
+    $stmt->bindValue(':search', '%'.$search.'%');
+    $stmt->bindValue(':curUser', $_SESSION['user']);
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
@@ -68,34 +69,35 @@ function searchUser($pdo, $curUser)
             echo '';
         }
         elseif(!$stmt->rowCount() == 0) {
+            echo "<form method='post'><table>";
             foreach($result as $user) {
-                if($user['username'] != $_SESSION['user']) {
-                    echo "<form method='post'><table><tr><td>".ucfirst(htmlentities($user['username']));
-                    requestCheck($pdo, $curUser, $user);
-                    echo '</td></tr></table>';
-                    addUser($pdo, $curUser);
-                }
+                echo '<tr><td>'.ucfirst(htmlentities($user['username']));
+                requestCheck($pdo, $curUser, $user);
+                addUser($pdo, $curUser);
             }
-            
+            echo '</td></tr>';
         } else {
-            echo '<p>No user found matching your search.</p>';
+            echo '<p>No users found matching your search.</p>';
         }
+        echo '</table></form>';
     }
-    if(isset($_POST['search']) && strlen($_POST['search']) < 3) {
-        echo '<p>No results found. Your search has to be at least 3 characters long.</p>';
-    }
+}
+    
+    
+if(isset($_POST['search']) && strlen($_POST['search']) < 3) {
+    echo '<p>No results found. Your search has to be at least 3 characters long.</p>';
 }
 
 function getUserList($pdo, $curUser, $otherUsers)
 {
-    echo "<form method='post'>";
+    echo "<form method='post'><table>";
     foreach($otherUsers as $user) {
-        echo '<table><tr><td>'.ucfirst(htmlentities($user['username']));
+        echo '<tr><td>'.ucfirst(htmlentities($user['username']));
         requestCheck($pdo, $curUser, $user);
-        echo '</td></tr></table>';
+        echo '</td></tr>';
         addUser($pdo, $curUser);
     }
-    echo '</form>';
+    echo '</table></form>';
 }
 
 ?>
