@@ -12,11 +12,11 @@ include('include/FriendFunctions.php');
     <body>
         <div>
             <?php
-            userCheck($pdo, $curUser, $otherUsers);
+            userCheck($pdo, $otherUsers);
             echo '<p><b>Friend requests:</b></p>';
-            getFriendRequest($pdo, $curUser);
+            getFriendRequest($pdo);
             echo '<p><b>Friends:</b></p>';
-            getFriendList($pdo, $curUser);
+            getFriendList($pdo);
             ?>
         </div>
     </body>

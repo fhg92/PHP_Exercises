@@ -1,6 +1,6 @@
 <?php
 
-function getFriendList($pdo, $curUser)
+function getFriendList($pdo)
 {   
     // Get ID from user_one_id and user_two_id.
     $sql = 'SELECT user_one_id, user_two_id FROM relation WHERE status = :status';
@@ -12,19 +12,20 @@ function getFriendList($pdo, $curUser)
     
     echo "<form method='post'><table>";
     foreach($relations as $user) {
-        if($user[0] == $curUser['user_id'] OR $user[1] == $curUser['user_id']) {
-            $sql = 'SELECT username, user_id FROM user WHERE user_id = :id';
+        if($user[0] == $_SESSION['userid'] OR $user[1] == $_SESSION['userid']) {
+            $sql = 'SELECT * FROM user_personal WHERE user_id = :id';
             $stmt = $pdo->prepare($sql);
-            if($user[0] == $curUser['user_id']) {
+            if($user[0] == $_SESSION['userid']) {
                 $stmt->bindParam(':id', $user[1], PDO::PARAM_INT);
             }
-            if($user[1] == $curUser['user_id']) {
+            if($user[1] == $_SESSION['userid']) {
                 $stmt->bindParam(':id', $user[0], PDO::PARAM_INT);
             }
             $stmt->execute();
             $friend = $stmt->fetch(PDO::FETCH_ASSOC);
-            echo '<tr><td>'.ucfirst(htmlentities($friend['username'])).
-                " <button type='submit' name='delete' value='".$friend['user_id'].
+            echo '<tr><td><a href="Users.php?id='.$friend['user_id'].'">'.ucfirst(htmlentities($friend['first_name'])).' '.
+                htmlentities($friend['last_name']).
+                "<a> <button type='submit' name='delete' value='".$friend['user_id'].
                 "'>Delete</button></td></tr>";
         }
     }
@@ -33,13 +34,13 @@ function getFriendList($pdo, $curUser)
         foreach($_POST as $value) {
             $sql= 'DELETE FROM relation WHERE user_one_id = :userOne AND user_two_id = :userTwo';
             $stmt = $pdo->prepare($sql);
-            if($user[0] == $curUser['user_id']) {
-                $stmt->bindParam(':userOne', $curUser['user_id'], PDO::PARAM_INT);
+            if($user[0] == $_SESSION['userid']) {
+                $stmt->bindParam(':userOne', $_SESSION['userid'], PDO::PARAM_INT);
                 $stmt->bindParam(':userTwo', $value, PDO::PARAM_INT);
             }
-            if($user[1] == $curUser['user_id']) {
+            if($user[1] == $_SESSION['userid']) {
                 $stmt->bindParam(':userOne', $value, PDO::PARAM_INT);
-                $stmt->bindParam(':userTwo', $curUser['user_id'], PDO::PARAM_INT);
+                $stmt->bindParam(':userTwo', $_SESSION['userid'], PDO::PARAM_INT);
             }
             $stmt->execute();
             header('Location: Friends.php');
@@ -51,7 +52,7 @@ function getFriendList($pdo, $curUser)
     echo '<table></form>';
 } 
 
-function getFriendRequest($pdo, $curUser)
+function getFriendRequest($pdo)
 {
     // If current user is user_two_id in relation database and status = 0.
     // Get friend request from user_one_id.
@@ -59,20 +60,20 @@ function getFriendRequest($pdo, $curUser)
     $stmt = $pdo->prepare($sql);
     $i = 0;
     $stmt->bindParam(':status', $i, PDO::PARAM_INT);
-    $stmt->bindParam(':id', $curUser['user_id'], PDO::PARAM_INT);
+    $stmt->bindParam(':id', $_SESSION['userid'], PDO::PARAM_INT);
     $stmt->execute();
     $request = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo '<form method="post"><table>';
     foreach($request as $req) {
-        $sql = 'SELECT username FROM user WHERE user_id = :id';
+        $sql = 'SELECT first_name, last_name FROM user_personal WHERE user_id = :id';
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id', $req['user_one_id'], PDO::PARAM_INT);
         $stmt->execute();
         $name = $stmt->fetch();
 
         if(!empty($name)) {
-            echo '<tr><td>'.ucfirst(htmlentities($name[0])). 
+            echo '<tr><td>'.ucfirst(htmlentities($name[0])).' '.htmlentities($name[1]).
                 ' has sent you a friend request.'.
                 " <button type='submit' name='accept' value='".$req['user_one_id'].
                 "'>Accept</button>
@@ -82,7 +83,7 @@ function getFriendRequest($pdo, $curUser)
         }
     } 
     if(empty($request) or empty($name)) {
-        echo 'There are no new friend requests.';
+        echo '<tr><td>There are no new friend requests.</td></tr>';
     }
     echo '</table></form>';
     
@@ -105,7 +106,7 @@ function getFriendRequest($pdo, $curUser)
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':status', $i, PDO::PARAM_INT);
             $stmt->bindParam(':id1', $value, PDO::PARAM_INT);
-            $stmt->bindParam(':id2', $curUser['user_id'], PDO::PARAM_INT);
+            $stmt->bindParam(':id2', $_SESSION['userid'], PDO::PARAM_INT);
             $stmt->execute();
             $userId = null;
             header('Location: Friends.php');

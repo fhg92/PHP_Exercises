@@ -2,7 +2,7 @@
     <body>
         <form method='post'>
             <div>
-                <input type='text' name='user' placeholder='Username'/>
+                <input type='text' name='email' placeholder='Username'/>
             </div>
             <br>
             <div>

@@ -3,12 +3,8 @@ body {
   padding: 0;
 }
 
-p, form, .search { 
+p, form, .search, .info { 
     padding-left: 1%;
-}
-
-tr {
-    padding-bottom: 10px;
 }
 
 .navbar {

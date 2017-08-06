@@ -15,7 +15,7 @@ include('include/GroupFunctions.php');
                     <input type='submit' name='add' value='Add'/>
                 </div>
                     <?php
-                    if(userCheck($pdo, $curUser, $otherUsers) == true) {
+                    if(userCheck($pdo, $otherUsers) == true) {
                         if(isset($_POST['add'])) {
                             checkGroupName($message);
                             if(isset($message)) {
@@ -23,11 +23,11 @@ include('include/GroupFunctions.php');
                                     echo '<span style="color:red">'.$value.'</span>';
                                 }
                             } else {
-                                createGroup($pdo, $curUser);
+                                createGroup($pdo);
                             }
                         }
                         echo '<br><div><b>My groups:</b></div><br>';
-                        getGroups($pdo, $curUser);
+                        getGroups($pdo);
                     }
                     ?>
             </form>

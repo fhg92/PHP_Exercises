@@ -19,7 +19,7 @@ function checkGroupName(&$message)
     return true;
 }
 
-function createGroup($pdo, $curUser) {
+function createGroup($pdo) {
     if(isset($_POST['add'])) {
         $sql = "INSERT INTO groups(group_name) VALUES (:name)";
         $stmt = $pdo->prepare($sql);
@@ -36,7 +36,7 @@ function createGroup($pdo, $curUser) {
         $sql = "INSERT INTO group_user(group_id, user_id, status) VALUES (:groupId, :userId, :status)";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':groupId', $groupName['group_id'], PDO::PARAM_STR);
-        $stmt->bindParam(':userId', $curUser['user_id'], PDO::PARAM_STR);
+        $stmt->bindParam(':userId', $_SESSION['userid'], PDO::PARAM_STR);
         // Status 2 has admin rights.
         $i = 2;
         $stmt->bindParam(':status', $i, PDO::PARAM_STR);
@@ -46,10 +46,10 @@ function createGroup($pdo, $curUser) {
     return false;
 }
 
-function getGroups($pdo, $curUser) {
+function getGroups($pdo) {
     $sql = 'SELECT group_id FROM group_user WHERE user_id = :userId';
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':userId', $curUser['user_id'], PDO::PARAM_STR);
+    $stmt->bindParam(':userId', $_SESSION['userid'], PDO::PARAM_STR);
     $stmt->execute();
     $groupId = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -68,9 +68,10 @@ function getGroups($pdo, $curUser) {
                 <button type='submit' name='Delete' value='".$row['group_id'].
                 "'>Delete</button>
                 </td></tr>";
-        } else {
-            echo "You're not in any group yet.";
         }
+    }
+    if(empty($groupName)) {
+        echo "You're not in any group yet.";
     }
     echo '</table></form>';
 }

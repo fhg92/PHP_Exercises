@@ -1,8 +1,33 @@
+<?php
+include('include/DbConnect.php');
+include('include/RegisterFunctions.php');
+?>
+
 <html>
     <body>
         <form method='post'>
             <div>
-                <input type='text' name='user' placeholder='Username'/>
+                <input type='text' name='firstName' placeholder='First name'/>
+            </div>
+            <br>
+            <div>
+                <input type='text' name='lastName' placeholder='Last name'/>
+            </div>
+            <br>
+            <div>
+                <input type="text" name='city' placeholder='City'/>
+            </div>
+            <br>
+            <div>
+                <input type='date' name='dateOfBirth'/>
+            </div>
+            <br>
+            <div>
+                <?php genderSelect($pdo); ?>
+            </div>
+            <br>
+            <div>
+                <input type='text' name='email' placeholder='E-mail address'/>
             </div>
             <br>
             <div>
@@ -14,33 +39,29 @@
             </div>
             <br>
             <input type='submit' name='register' value='Register'/>
-        
-<?php
-
-include('include/DbConnect.php');
-include('include/RegisterFunctions.php');
             
-echo '<br>';
-
-if(isset($_POST['user']) && checkUser($error) == true) {
-    checkUserDb($pdo, $user, $error);
-}
-
-checkPass($error);
+            <?php
+            echo '<br>';
+            if(isset($_POST['email'])) {
+                checkEmail($error);
+                checkUserDb($pdo, $error);
+            }
+            checkPass($error);
+            checkInputFields($error);
     
-if(isset($error)) {
-    echo '<br>';
-    foreach($error as $key => $value) {
-        echo '<span style="color:red">'.$value.'</span>';
-    }
-} else {
-    if(insert($pdo) == true) {
-        $message = "You've succesfully registered. ";
-    }
-}
-echo '</div>';
-
-?>    
+            if(isset($error)) {
+                echo '<br>';
+                foreach($error as $key => $value) {
+                    echo '<span style="color:red">'.$value.'</span>';
+                }
+            } else {
+                if(insert($pdo) == true) {
+                    $message = "You've succesfully registered. ";
+                }
+                echo '</div>';
+            }
+            ?>
+            
         </form>
         <a href='Login.php'>
             <?php 
