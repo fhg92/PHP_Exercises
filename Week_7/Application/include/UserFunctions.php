@@ -55,16 +55,13 @@ function requestCheck($pdo, $user)
 }
 
 function searchUser($pdo)
-{   
+{
     if(isset($_POST['search']) && strlen($_POST['search']) >= 3) {
-    $search = $_POST['search'];
     $sql = 'SELECT * FROM user_personal WHERE user_id != :curUser AND first_name 
     LIKE :search OR last_name LIKE :search OR city like :search';
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':search', '%'.$search.'%');
+    $stmt->bindValue(':search', '%'.$_POST['search'].'%');
     $stmt->bindValue(':curUser', $_SESSION['userid']);
-    $stmt->bindParam(':u1', $friend[0]['user_one_id']);
-    $stmt->bindParam(':u2', $friend[0]['user_two_id']);
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
