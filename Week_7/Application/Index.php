@@ -17,7 +17,7 @@ getUserDetails($pdo, $details, $gender);
     </div>
     
     <div>
-        <p><b>My info:</b></p>
+        <p><b>Profile overview:</b></p>
     </div>
     <table class='info'>
         <tr><td>First name: <?= ucfirst(htmlentities($details['first_name'])); ?></td></tr>

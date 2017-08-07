@@ -5,8 +5,7 @@ function getFriendList($pdo)
     // Get ID from user_one_id and user_two_id.
     $sql = 'SELECT user_one_id, user_two_id FROM relation WHERE status = :status';
     $stmt = $pdo->prepare($sql);
-    $i = 1;
-    $stmt->bindParam(':status', $i, PDO::PARAM_INT);
+    $stmt->bindValue(':status', 1, PDO::PARAM_INT);
     $stmt->execute();
     $relations = $stmt->fetchAll();
     
@@ -54,40 +53,33 @@ function getFriendList($pdo)
 
 function getFriendRequest($pdo)
 {
-    // If current user is user_two_id in relation database and status = 0.
-    // Get friend request from user_one_id.
-    $sql = 'SELECT user_one_id FROM relation WHERE status = :status AND user_two_id = :id';
+    $sql = 'SELECT user_id, first_name, last_name FROM user_personal u INNER 
+    JOIN relation r WHERE r.user_one_id = u.user_id AND r.user_two_id = :id
+    AND status = :status';
     $stmt = $pdo->prepare($sql);
-    $i = 0;
-    $stmt->bindParam(':status', $i, PDO::PARAM_INT);
-    $stmt->bindParam(':id', $_SESSION['userid'], PDO::PARAM_INT);
+    $stmt->bindValue(':id', $_SESSION['userid']);
+    $stmt->bindValue(':status', 0, PDO::PARAM_INT);
     $stmt->execute();
-    $request = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo '<form method="post"><table>';
-    foreach($request as $req) {
-        $sql = 'SELECT first_name, last_name FROM user_personal WHERE user_id = :id';
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':id', $req['user_one_id'], PDO::PARAM_INT);
-        $stmt->execute();
-        $name = $stmt->fetch();
-
-        if(!empty($name)) {
-            echo '<tr><td>'.ucfirst(htmlentities($name[0])).' '.htmlentities($name[1]).
+    foreach($requests as $data) {
+        if(!empty($data)) {
+            echo '<tr><td>'.ucfirst(htmlentities($data['first_name'])).' '.htmlentities($data['last_name']).
                 ' has sent you a friend request.'.
-                " <button type='submit' name='accept' value='".$req['user_one_id'].
+                " <button type='submit' name='accept' value='".$data['user_id'].
                 "'>Accept</button>
-                <button type='submit' name='decline' value='".$req['user_one_id'].
+                <button type='submit' name='decline' value='".$data['user_id'].
                 "'>Decline</button>
                 </td></tr>";
         }
     } 
-    if(empty($request) or empty($name)) {
+    if(empty($requests) or empty($data)) {
         echo '<tr><td>There are no new friend requests.</td></tr>';
     }
     echo '</table></form>';
     
-    if(!empty($request) && isset($_POST['accept']) or isset($_POST['decline'])) {
+    if(!empty($requests) && isset($_POST['accept']) or isset($_POST['decline'])) {
         foreach($_POST as $value) {
             if(isset($_POST['accept']) or isset($_POST['decline'])) {
                 // If friend request accepted.

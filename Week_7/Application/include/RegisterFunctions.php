@@ -90,7 +90,8 @@ function genderSelect($pdo)
     
     echo '<select name="gender">';
     foreach($label as $gender) {
-        echo '<option value="'.$gender['gender_id'].'">'.$gender['label'].'</option>';
+        echo '<option value="'.$gender['gender_id'].'">'.$gender['label'].
+            '</option>';
     }
     echo '</select>';
     
@@ -99,25 +100,27 @@ function genderSelect($pdo)
 function insert($pdo)
 {
     if(isset($_POST['register'])) {
-        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-        $sql = "INSERT INTO user(email, password)
-        VALUES (:email, :pass)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':email', $_POST['email'], PDO::PARAM_STR);
-        $stmt->bindParam(':pass', $password, PDO::PARAM_STR);
-        $stmt->execute();
-        
-        $sql = "INSERT INTO user_personal(first_name, last_name, city, date_of_birth, gender_id, date_registered)
-        VALUES (:firstName, :lastName, :city, :DOB, :gender, NOW())";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':firstName', $_POST['firstName'], PDO::PARAM_STR);
-        $stmt->bindParam(':lastName', $_POST['lastName'], PDO::PARAM_STR);
-        $stmt->bindParam(':city', $_POST['city'], PDO::PARAM_STR);
-        $stmt->bindParam(':DOB', $_POST['dateOfBirth'], PDO::PARAM_STR);
-        $stmt->bindParam(':gender', $_POST['gender'], PDO::PARAM_STR);
-        $stmt->execute();
-        return true;
+        try {  
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->beginTransaction();
+            $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+            $stmt = $pdo->prepare('INSERT INTO user(email, password) 
+            VALUES (?, ?)');
+            $stmt->execute([$_POST['email'], $password]);
+            
+            $sql = "INSERT INTO user_personal(first_name, last_name, city, 
+            date_of_birth, gender_id, date_registered)
+            VALUES (?, ?, ?, ?, ?, NOW())";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$_POST['firstName'], $_POST['lastName'], $_POST['city'],
+                          $_POST['dateOfBirth'], $_POST['gender']]);
+            $pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $dbh->rollBack();
+            echo "Failed: " . $e->getMessage();
+            return false;
+        }
     }
-    return false;
 }
 ?>

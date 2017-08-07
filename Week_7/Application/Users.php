@@ -7,7 +7,16 @@ getUserDetails($pdo, $details, $gender);
 
 <html>
     <head>
-        <title>Users</title>
+        <title>
+        <?php
+        if(isset($_GET['id'])) {
+            echo ucfirst(htmlentities($details['first_name'])).' '.
+            htmlentities($details['last_name']);
+        } else {
+            echo 'Users';
+        }
+        ?>
+        </title>
     </head>
     <body>
         <?php

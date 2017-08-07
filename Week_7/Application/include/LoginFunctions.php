@@ -70,9 +70,9 @@ function checkPassDb($pdo, &$hash, &$error) {
 }
 function logIn($pdo, $hash, &$error) {
     $password = $_POST['password'];
-    
     if(password_verify($password, $hash) && $_POST['password'] != null) { 
         
+        // Query to select user ID to put in a session later.
         $sql = 'SELECT user_id FROM user WHERE email = :email';
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':email', $_POST['email'], PDO::PARAM_STR);
