@@ -48,25 +48,19 @@ getUserDetails($pdo, $details, $gender);
         ?>      
         
         <div>
-            <p><b>Search user:</b></p>
+            <p><b>Search User:</b></p>
             <form method='post' class='search'>
                 <input type='text' name='search' placeholder='Search'/>
                 <input type="submit" name='submit' value="Submit" />
             </form>
             <?php
-            if(userCheck($pdo, $otherUsers) == true) {
                 searchUser($pdo); 
-            }
             ?>
         </div>
         <div>
             <p><b>Users:</b></p>
             <?php
-            if(userCheck($pdo, $otherUsers) == true) {
-                getUserList($pdo, $otherUsers);
-            } else {
-                echo '<p>There are no other registered users yet.</p>';
-            }
+                getUserList($pdo);
             ?>
         </div>
         <?php

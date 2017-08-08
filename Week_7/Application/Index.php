@@ -3,7 +3,7 @@
 include('include/Header.php');
 include('include/UserFunctions.php');
 
-userCheck($pdo, $otherUsers);
+userCheck($pdo);
 getUserDetails($pdo, $details, $gender);
 
 ?>
@@ -17,7 +17,7 @@ getUserDetails($pdo, $details, $gender);
     </div>
     
     <div>
-        <p><b>Profile overview:</b></p>
+        <p><b>Profile Overview:</b></p>
     </div>
     <table class='info'>
         <tr><td>First name: <?= ucfirst(htmlentities($details['first_name'])); ?></td></tr>

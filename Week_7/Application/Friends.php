@@ -12,9 +12,16 @@ include('include/FriendFunctions.php');
     <body>
         <div>
             <?php
-            userCheck($pdo, $otherUsers);
-            echo '<p><b>Friend requests:</b></p>';
+            userCheck($pdo);
+            echo '<p><b>Friend Requests:</b></p>';
             getFriendRequest($pdo);
+            echo "<p><b>Search Friends:</b></p>
+                <form method='post' class='search'>
+                <input type='text' name='search' placeholder='Search'/>
+                <input type='submit' name='submit' value='Submit' />
+                </form>";
+            
+            searchFriend($pdo); 
             echo '<p><b>Friends:</b></p>';
             getFriendList($pdo);
             ?>

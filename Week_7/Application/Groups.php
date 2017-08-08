@@ -8,29 +8,29 @@ include('include/GroupFunctions.php');
         <title>Groups</title>
     </head>
         <div>
-            <p><b>Add group:</b></p>
+            <p><b>Add Group:</b></p>
             <form method='post' class='search'>
-                <div>
-                    <input type='text' name='group' placeholder='Group name'/>
-                    <input type='submit' name='add' value='Add'/>
-                </div>
-                    <?php
-                    if(userCheck($pdo, $otherUsers) == true) {
-                        if(isset($_POST['add'])) {
-                            checkGroupName($message);
-                            if(isset($message)) {
-                                foreach($message as $key => $value) {
-                                    echo '<span style="color:red">'.$value.'</span>';
-                                }
-                            } else {
-                                createGroup($pdo);
-                            }
-                        }
-                        echo '<br><div><b>My groups:</b></div><br>';
-                        getGroups($pdo);
-                    }
-                    ?>
+                <input type='text' name='group' placeholder='Group name'/>
+                <input type='submit' name='add' value='Add'/>
             </form>
+            <?php
+            userCheck($pdo);
+            if(isset($_POST['add'])) {
+                checkGroupName($message);
+                if(isset($message)) {
+                    foreach($message as $key => $value) {
+                        echo '<span style="color:red">'.$value.'</span>';
+                    }
+                } else {
+                    createGroup($pdo);
+                }
+            }
+            echo '<p><b>My Groups:</b></p>';
+            getMyGroups($pdo);
+            echo '<p><b>Other Groups:</b></p>';
+            getAllGroups($pdo);
+                
+            ?>
         </div>
     </body>
 </html>
