@@ -25,12 +25,12 @@ function searchFriend($pdo)
                 </td></tr>";
             }
         } else {
-            $result = '<p>No users found matching your search.</p>';
+            $result = '<tr><td>No users found matching your search.</td></tr>';
         }
     }
     if(isset($_POST['submit']) && strlen($_POST['search']) < 3) {
-        $result = '<p>No results found. Your search has to be at least 3 
-        characters long.</p>';
+        $result = '<tr><td>No results found. Your search has to be at least 3 
+        characters long.</td></tr>';
     }
     if(isset($result)) {
         setcookie('result', $result, time()+1);
@@ -43,15 +43,8 @@ function searchFriend($pdo)
     }
 }
 
-function getFriendList($pdo)
+function getFriendList($pdo, $relations)
 {   
-    // Get ID from user_one_id and user_two_id.
-    $sql = 'SELECT user_one_id, user_two_id FROM relation WHERE status = :status';
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':status', 1, PDO::PARAM_INT);
-    $stmt->execute();
-    $relations = $stmt->fetchAll();
-    
     echo "<form method='post'><table>";
     foreach($relations as $user) {
         if($user[0] == $_SESSION['userid'] OR $user[1] == $_SESSION['userid']) {
@@ -72,27 +65,11 @@ function getFriendList($pdo)
                 </td></tr>";
         }
     }
-    
-    if(isset($_POST['delete'])) {
-        foreach($_POST as $value) {
-            $sql= 'DELETE FROM relation WHERE user_one_id = :userOne AND user_two_id = :userTwo';
-            $stmt = $pdo->prepare($sql);
-            if($user[0] == $_SESSION['userid']) {
-                $stmt->bindParam(':userOne', $_SESSION['userid'], PDO::PARAM_INT);
-                $stmt->bindParam(':userTwo', $value, PDO::PARAM_INT);
-            }
-            if($user[1] == $_SESSION['userid']) {
-                $stmt->bindParam(':userOne', $value, PDO::PARAM_INT);
-                $stmt->bindParam(':userTwo', $_SESSION['userid'], PDO::PARAM_INT);
-            }
-            $stmt->execute();
-            header('Location: Friends.php');
-        }
-    }
-    if(!isset($friend)){
+        if(!isset($friend)){
         echo "<p>You don't have any friends in your friendlist yet.</p>";
     }
     echo '<table></form>';
+    deleteFriend($pdo, $relations);
 }
 
 function getFriendRequest($pdo)

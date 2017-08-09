@@ -29,7 +29,6 @@ include('include/GroupFunctions.php');
             getMyGroups($pdo);
             echo '<p><b>Other Groups:</b></p>';
             getAllGroups($pdo);
-                
             ?>
         </div>
     </body>

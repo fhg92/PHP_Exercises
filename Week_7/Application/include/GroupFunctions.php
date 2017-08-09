@@ -46,30 +46,43 @@ function createGroup($pdo)
 function getMyGroups($pdo)
 {
     $sql = 'SELECT * FROM groups g INNER JOIN group_user gu ON g.group_id = 
-    gu.group_id WHERE gu.user_id = :userId AND status != :status ORDER BY
-    gu.status DESC';
+    gu.group_id WHERE gu.user_id = :userId ORDER BY gu.status DESC';
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':userId', $_SESSION['userid'], PDO::PARAM_INT);
-    $stmt->bindValue(':status', 0, PDO::PARAM_INT);
+    //$stmt->bindValue(':status', 0, PDO::PARAM_INT);
     $stmt->execute();
     $myGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo "<form method='post'><table>";
     foreach($myGroups as $group) {
-        echo '<tr><td>'.ucfirst(htmlentities($group['group_name']));
         if($group['status'] == 2) {
+            echo '<tr><td>'.ucfirst(htmlentities($group['group_name']));
             echo " <button type='submit' name='delete' value='".
                 $group['group_id']."'>Delete</button></td></tr>";
         }
         if($group['status'] == 1) {
+            echo '<tr><td>'.ucfirst(htmlentities($group['group_name']));
             echo " <button type='submit' name='leave' value='"
                 .$group['group_id']."'>Leave</button></td></tr>";
         }
     }
-    echo '</table></form>';
-    if(empty($myGroups)) {
+    if(!isset($group) or $group['status'] != 1 && $group['status'] != 2) {
         echo "<p>You're not in any group yet.</p>";
     }
+    
+    echo '</table></form>';
+    
+    echo '<p><b>Pending:</b></p><table>';
+    foreach($myGroups as $group) {
+        if($group['status'] == 0) {
+            echo '<tr><td>'.ucfirst(htmlentities($group['group_name'])).
+                ' <button disabled>Pending...</button></td></tr>';
+        }
+    }
+    if(!isset($group) or $group['status'] != 0) {
+        echo '<p>No group requests sent.</p>';
+    }
+    echo '</table>';
     
     if(isset($_POST['delete']) or isset($_POST['leave'])) {
         foreach($_POST as $value) {
@@ -94,37 +107,36 @@ function getMyGroups($pdo)
 
 function getAllGroups($pdo)
 {
-    // UNDER CONSTRUCTION.
-    $sql = 'SELECT * FROM groups g INNER JOIN group_user gu ON g.group_id = gu.group_id
-    WHERE gu.user_id != :userId OR (gu.user_id = :userId AND gu.status = :status) GROUP BY gu.group_id';
+    $sql = 'SELECT * FROM groups g INNER JOIN group_user gu on g.group_id = gu.group_id
+    WHERE gu.user_id != :userId AND status = :status';
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue('userId', $_SESSION['userid'], PDO::PARAM_INT);
-    $stmt->bindValue('status', 0, PDO::PARAM_INT);
+    $stmt->bindValue(':userId', $_SESSION['userid']);
+    $stmt->bindValue(':status', 2);
     $stmt->execute();
     $allGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
     var_dump($allGroups);
     
     echo "<form method='post'><table>";
-    foreach($allGroups as $row) {
-        echo '<tr><td>'.ucfirst(htmlentities($row['group_name']));
+    foreach($allGroups as $group) {
+        echo '<tr><td>'.ucfirst(htmlentities($group['group_name']));
+            echo " <button type='submit' name='join' value='".
+                $group['group_id']."'>Join</button></td></tr>";
     }
-    if(empty($allGroups)) {
-        echo '<tr><td>There are no other groups yet.</td></tr>';
-    }
+
     echo '</table></form>';
     
     if(isset($_POST['join'])) {
+        $sql = 'INSERT INTO group_user(group_id, user_id, status) VALUES 
+        (:groupId, :userId, :status)';
+        $stmt = $pdo->prepare($sql);
         foreach($_POST as $value) {
-            $sql = 'INSERT INTO group_user (group_id, user_id, status) VALUES
-            (:groupId, :userId, :status)';
-            $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':groupId', $value, PDO::PARAM_INT);
-            $stmt->bindValue(':userId', $_SESSION['userid'], PDO::PARAM_INT); 
-            $stmt->bindValue(':status', 0, PDO::PARAM_INT); 
-            $stmt->execute();
-            
-            header('Location: Groups.php');
         }
+        $stmt->bindValue(':userId', $_SESSION['userid'], PDO::PARAM_INT);
+        // Status 0 is pending.
+        $stmt->bindValue(':status', 0, PDO::PARAM_INT);
+        $stmt->execute();
+        header('Location: Groups.php');
     }
 }
 

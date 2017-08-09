@@ -2,6 +2,7 @@
 
 include('include/Header.php');
 include('include/FriendFunctions.php');
+include('include/MainFunctions.php');
 
 ?>
 
@@ -23,7 +24,8 @@ include('include/FriendFunctions.php');
             
             searchFriend($pdo); 
             echo '<p><b>Friends:</b></p>';
-            getFriendList($pdo);
+            deleteFriend($pdo, $relations);
+            getFriendList($pdo, $relations);
             ?>
         </div>
     </body>

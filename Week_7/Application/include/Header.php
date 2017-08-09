@@ -11,8 +11,6 @@ $stmt->bindParam(':userId', $_SESSION['userid'], PDO::PARAM_STR);
 $stmt->execute();
 $user = $stmt->fetch();
 
-$_SESSION['firstname'] = $user[0];
-
 ?>
 
 <html>

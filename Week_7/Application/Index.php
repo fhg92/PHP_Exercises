@@ -10,10 +10,10 @@ getUserDetails($pdo, $details, $gender);
 
 <html>
     <head>
-        <title><?= ucfirst(htmlentities($_SESSION['firstname'])); ?></title>
+        <title><?= ucfirst(htmlentities($user[0])); ?></title>
     </head>
     <div>
-        <p>Welcome <?= ucfirst(htmlentities($_SESSION['firstname'])); ?>.</p>
+        <p>Welcome <?= ucfirst(htmlentities($user[0])); ?>.</p>
     </div>
     
     <div>

@@ -1,31 +1,16 @@
 <?php
 
-function addUser($pdo)
-{
-    if(isset($_POST['add'])) {
-        foreach($_POST as $value) {
-            // Status.
-            $i = 0;
-            
-            $sql = 'INSERT INTO relation(user_one_id, user_two_id, status) 
-            VALUES(:curId, :otherId, :status)';
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':curId', $_SESSION['userid'], PDO::PARAM_INT);
-            $stmt->bindParam(':otherId', $value, PDO::PARAM_INT);
-            $stmt->bindParam(':status', $i, PDO::PARAM_INT);
-            $stmt->execute();
-        }
-        header('Location: Users.php');
-    }
-}
-
 function requestCheck($pdo, $user)
 {
     $sql = 'SELECT status FROM relation WHERE user_one_id = :u1 AND user_two_id
     = :u2';
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':u1', $_SESSION['userid'], PDO::PARAM_INT);
-    $stmt->bindParam(':u2', $user['user_id'], PDO::PARAM_INT);
+    if(isset($_GET['id'])) {
+        $stmt->bindParam(':u2', $_GET['id'], PDO::PARAM_INT);
+    } else {
+        $stmt->bindParam(':u2', $user['user_id'], PDO::PARAM_INT);
+    }
     $stmt->execute();
     // Status of sent requests.
     $sent = $stmt->fetch();
@@ -33,7 +18,11 @@ function requestCheck($pdo, $user)
     $sql = 'SELECT status FROM relation WHERE user_one_id = :u1 AND user_two_id
     = :u2';
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':u1', $user['user_id'], PDO::PARAM_INT);
+    if(isset($_GET['id'])) {
+        $stmt->bindParam(':u1', $_GET['id'], PDO::PARAM_INT);
+    } else {
+        $stmt->bindParam(':u1', $user['user_id'], PDO::PARAM_INT);
+    }
     $stmt->bindParam(':u2', $_SESSION['userid'], PDO::PARAM_INT);
     $stmt->execute();
     // Status of received requests.
@@ -45,14 +34,49 @@ function requestCheck($pdo, $user)
                 echo " <button disabled>Request sent</button>";
             }
             if($sent[0] == 1) {
-                echo '';
+                if(isset($_GET['id'])) {
+                    echo " <button type='submit' name='delete' value='".$_GET['id']."'>Delete</button>";
+                } else {
+                    echo '';   
+                }
             }
         }
         if(!isset($sent[0])) {
-            echo " <button type='submit' name='add' value='"
-                .$user['user_id']."'>Add</button>";
+            echo " <button type='submit' name='add' value='";
+            if(isset($_GET['id'])) {
+                echo $_GET['id'];
+            } else {
+                echo $user['user_id'];
+            }
+            echo "'>Add</button>";
         }
-    } 
+    } else {
+        if(isset($_GET['id'])) {
+            echo " <button type='submit' name='delete' value='".$_GET['id']."'>Delete</button>";
+        } else {
+            echo '';
+        }
+    }
+}
+
+function addUser($pdo)
+{
+    if(isset($_POST['add'])) {
+        $sql = 'INSERT INTO relation(user_one_id, user_two_id, status) 
+        VALUES(:curId, :otherId, :status)';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':curId', $_SESSION['userid'], PDO::PARAM_INT);
+        foreach($_POST as $value) {
+            $stmt->bindParam(':otherId', $value, PDO::PARAM_INT);
+        }
+        $stmt->bindValue(':status', 0, PDO::PARAM_INT);
+        $stmt->execute();
+        if(isset($_GET['id'])){
+            header('Location: Users.php?id='.$_GET['id'].'');
+        } else {
+            header('Location: Users.php');
+        }
+    }
 }
 
 function searchUser($pdo)
@@ -68,20 +92,21 @@ function searchUser($pdo)
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         if(!$stmt->rowCount() == 0) {
-            echo "<form method='post'><table>";
+            echo "<form method='post'>";
             foreach($users as $user) {
                 $result .= '<tr><td><a href="Users.php?id='.$user['user_id'].'">
                 '.ucfirst(htmlentities($user['first_name'])).' '.
                     htmlentities($user['last_name']).'</a></td></tr>';
             }
+            echo 'hoi';
         } else {
-            $result = '<p>No users found matching your search.</p>';
+            $result = '<tr><td>No users found matching your search.</td></tr>';
         }
-        echo '</table></form>';
+        echo '</form>';
     }
     if(isset($_POST['search']) && strlen($_POST['search']) < 3) {
-        $result = '<p>No results found. Your search has to be at 
-        least 3 characters long.</p>';
+        $result = '<tr><td>No results found. Your search has to be at 
+        least 3 characters long.</td></tr>';
     }
     if(isset($result)) {
         setcookie('result', $result, time()+1);
@@ -109,8 +134,7 @@ function getUserList($pdo)
         foreach($otherUsers as $user) {
             echo '<tr><td><a href="Users.php?id='.$user['user_id'].'">'.
                 ucfirst(htmlentities($user['first_name'])).' '.
-                htmlentities($user['last_name']);
-            echo '</a>';
+                htmlentities($user['last_name']).'</a>';
             requestCheck($pdo, $user);
             echo '</td></tr>';
             addUser($pdo);

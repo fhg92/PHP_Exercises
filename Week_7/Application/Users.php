@@ -2,6 +2,10 @@
 include('include/Header.php');
 include('include/UserFunctions.php');
 
+if(isset($_GET['id'])) {
+    include('include/MainFunctions.php');
+}
+
 getUserDetails($pdo, $details, $gender);
 ?>
 
@@ -22,8 +26,11 @@ getUserDetails($pdo, $details, $gender);
         <?php
         if(isset($_GET['id'])) {
         ?>
-        <p><b><?= ucfirst(htmlentities($details['first_name'])).' '.
-            htmlentities($details['last_name']); ?></b></p>
+        <form method='post'><p><b><?= ucfirst(htmlentities($details['first_name'])).' '.
+            htmlentities($details['last_name']); ?>
+            <?php requestCheck($pdo, $user); ?></b></p></form>
+        <?php addUser($pdo); deleteFriend($pdo, $relations); ?>
+        
         <table class='info'>
         <tr><td>Living in: <?= ucfirst(htmlentities($details['city'])); ?></td></tr>
         <?php $date = new DateTime($details['date_of_birth']); ?>
@@ -43,10 +50,13 @@ getUserDetails($pdo, $details, $gender);
             ?>
             </td></tr>
         </table>
-        <?php    
+        <?php
+        if(!isset($details['first_name']) OR $_GET['id'] == $_SESSION['userid']) {
+            header('Location: Users.php');
+        }
+            
         } else { 
         ?>      
-        
         <div>
             <p><b>Search User:</b></p>
             <form method='post' class='search'>
@@ -54,7 +64,7 @@ getUserDetails($pdo, $details, $gender);
                 <input type="submit" name='submit' value="Submit" />
             </form>
             <?php
-                searchUser($pdo); 
+                searchUser($pdo, $user); 
             ?>
         </div>
         <div>
