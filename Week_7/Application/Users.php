@@ -51,8 +51,11 @@ getUserDetails($pdo, $details, $gender);
             </td></tr>
         </table>
         <?php
-        if(!isset($details['first_name']) OR $_GET['id'] == $_SESSION['userid']) {
+        if(!isset($details['first_name'])) {
             header('Location: Users.php');
+        }
+        if($_GET['id'] == $_SESSION['userid']) {
+            header('Location: Index.php');
         }
             
         } else { 
