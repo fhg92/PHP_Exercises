@@ -14,9 +14,8 @@ include('include/GroupFunctions.php');
         <input type='submit' name='add' value='Add'/>
     </form>
     <?php
-    userCheck($pdo);
     if(isset($_POST['add'])) {
-        checkGroupName($message);
+        formValidation($message);
         if(isset($message)) {
             foreach($message as $key => $value) {
                 echo '<span style="color:red">'.$value.'</span>';
@@ -33,11 +32,10 @@ include('include/GroupFunctions.php');
     getOtherGroups($pdo, $myGroups, $pending);
     
     } else {
-        getCurrentGroupName($pdo, $groupName);
-        echo '<p><b>'.ucfirst(htmlentities($groupName)).'</b></p>';
-        getMembers($pdo);
+        getCurrentGroup($pdo, $admin);
+        getMembers($pdo, $users, $admin);
+        checkIfMember($users);
     }
-
     ?>
     
     </body>

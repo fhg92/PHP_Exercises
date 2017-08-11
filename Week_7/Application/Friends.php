@@ -13,7 +13,6 @@ include('include/MainFunctions.php');
     <body>
         <div>
             <?php
-            userCheck($pdo);
             echo '<p><b>Friend Requests:</b></p>';
             getFriendRequest($pdo);
             echo "<p><b>Search Friends:</b></p>

@@ -145,7 +145,8 @@ function getUserList($pdo)
 
 function getUserDetails($pdo, &$details, &$gender)
 {
-    $sql = 'SELECT * FROM user_personal WHERE user_id = :userId';
+    $sql = 'SELECT * FROM user_personal u INNER JOIN gender g ON u.gender_id 
+    = g.gender_id WHERE user_id = :userId';
     $stmt = $pdo->prepare($sql);
     if(isset($_GET['id'])) {
         $stmt->bindValue(':userId', $_GET['id'], PDO::PARAM_INT);
@@ -154,12 +155,21 @@ function getUserDetails($pdo, &$details, &$gender)
     }
     $stmt->execute();
     $details = $stmt->fetch();
-    
-    $sql = 'SELECT label FROM gender WHERE gender_id = :gender';
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':gender', $details['gender_id'], PDO::PARAM_INT);
-    $stmt->execute();
-    $gender = $stmt->fetch();
+}
+
+function deleteProfile($pdo)
+{
+    if(isset($_POST['delete'])) {
+        $sql = 'DELETE u, up, gu, one, two FROM user u INNER JOIN user_personal
+        up ON u.user_id = up.user_id LEFT JOIN group_user gu ON u.user_id = 
+        gu.user_id LEFT JOIN relation one ON u.user_id = one.user_one_id LEFT JOIN
+        relation two ON u.user_id = two.user_two_id WHERE u.user_id = :userId';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':userId', $_SESSION['userid'], PDO::PARAM_INT);
+        $stmt->execute();
+        session_destroy();
+        header('Location: Login.php');
+    }
 }
 
 ?>

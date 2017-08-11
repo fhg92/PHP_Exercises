@@ -19,7 +19,7 @@ include('include/RegisterFunctions.php');
             </div>
             <br>
             <div>
-                <input type='date' name='dateOfBirth'/>
+                <input type='date' min='1917-01-01' max='2017-01-01' name='dateOfBirth'/>
             </div>
             <br>
             <div>
@@ -42,7 +42,7 @@ include('include/RegisterFunctions.php');
             
             <?php
             echo '<br>';
-            if(isset($_POST['email'])) {
+            if(isset($_POST['email']) && !empty($_POST['email'])) {
                 checkEmail($error);
                 checkUserDb($pdo, $error);
             }

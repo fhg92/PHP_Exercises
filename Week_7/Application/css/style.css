@@ -3,7 +3,7 @@ body {
   padding: 0;
 }
 
-p, table, .search, .info { 
+p, table, .search, .info, .center { 
     padding-left: 1%;
 }
 

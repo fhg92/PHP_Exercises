@@ -1,4 +1,5 @@
 <?php
+
 include('include/Header.php');
 include('include/UserFunctions.php');
 
@@ -26,7 +27,8 @@ getUserDetails($pdo, $details, $gender);
         <?php
         if(isset($_GET['id'])) {
         ?>
-        <form method='post'><p><b><?= ucfirst(htmlentities($details['first_name'])).' '.
+        <form method='post'><p><b><?= ucfirst(
+            htmlentities($details['first_name'])).' '.
             htmlentities($details['last_name']); ?>
             <?php requestCheck($pdo, $user); ?></b></p></form>
         <?php addUser($pdo); deleteFriend($pdo, $relations); ?>
