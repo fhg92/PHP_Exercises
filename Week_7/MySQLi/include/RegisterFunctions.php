@@ -1,4 +1,5 @@
 <?php
+
 function checkEmail(&$error)
 {
     if(isset($_POST['email']) && !empty($_POST['email'])) {
@@ -9,12 +10,14 @@ function checkEmail(&$error)
         return true;
     }
 }
-function checkUserDb($pdo, &$error) {
-    $sql = "SELECT email FROM user WHERE email = :email";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':email', $_POST['email'], PDO::PARAM_STR);
+function checkUserDb($mysqli, &$error) {
+    $sql = "SELECT email FROM user WHERE email = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s', $_POST['email']);
     $stmt->execute();
-    $email = $stmt->fetchColumn();;
+    $email = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
     if($email == $_POST['email']) {
         $error[] = 'E-mail already in use.<br>'.PHP_EOL;
         return false;
@@ -81,12 +84,12 @@ function checkInputFields(&$error)
     }
 }
 
-function genderSelect($pdo)
+function genderSelect($mysqli)
 {
     $sql = 'SELECT * FROM gender';
-    $stmt = $pdo->prepare($sql);
+    $stmt = $mysqli->prepare($sql);
     $stmt->execute();
-    $label = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $label = $stmt->get_result();
     
     echo '<select name="gender">';
     foreach($label as $gender) {
@@ -97,30 +100,36 @@ function genderSelect($pdo)
     
 }
 
-function insert($pdo)
+function insert($mysqli)
 {
     if(isset($_POST['register'])) {
         try {
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $pdo->beginTransaction();
+            $mysqli->autocommit(false);
             $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-            $stmt = $pdo->prepare('INSERT INTO user(email, password) 
-            VALUES (?, ?)');
-            $stmt->execute([$_POST['email'], $password]);
+            $sql = 'INSERT INTO user(email, password) 
+            VALUES (?, ?)';
+            $stmt = $mysqli->prepare($sql);
+            $stmt->bind_param('ss', $_POST['email'], $password);
+            $stmt->execute();
+            $stmt->close();
             
             $sql = 'INSERT INTO user_personal(first_name, last_name, city, 
             date_of_birth, gender_id, date_registered)
             VALUES (?, ?, ?, ?, ?, NOW())';
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$_POST['firstName'], $_POST['lastName'], $_POST['city'],
-                          $_POST['dateOfBirth'], $_POST['gender']]);
-            $pdo->commit();
+            $stmt = $mysqli->prepare($sql);
+            $stmt->bind_param('sssss', $_POST['firstName'], $_POST['lastName'], 
+                              $_POST['city'], $_POST['dateOfBirth'], 
+                            $_POST['gender']);
+            $stmt->execute();
+            $stmt->close();
+            $mysqli->commit();
             return true;
         } catch (Exception $e) {
-            $dbh->rollBack();
+            $mysqli->rollback();
             echo "Failed: " . $e->getMessage();
             return false;
         }
     }
 }
+
 ?>
