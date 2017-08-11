@@ -308,8 +308,13 @@ function checkIfMember($users)
     // Get id's from all members and put them in an array.
     $id = array_column($users, 'user_id');
     
-    // If not in the array with id's from all members, redirect.
-    if(!in_array($_SESSION['userid'], $id)){
+    // Make array with user ID's as keys and statuses as values. 
+    $status = array_column($users, 'status', 'user_id');
+    
+    // If the status of the current user is 0 or not in the array with id's 
+    // from all members, redirect.
+    if($status[$_SESSION['userid']] == 0 or !in_array($_SESSION['userid'], 
+                                                      $id)) {
         header('Location: Groups.php');
     }
 }
