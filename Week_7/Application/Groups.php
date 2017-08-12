@@ -15,10 +15,10 @@ include('include/GroupFunctions.php');
     </form>
     <?php
     if(isset($_POST['add'])) {
-        formValidation($message);
+        formValidation($pdo, $message);
         if(isset($message)) {
             foreach($message as $key => $value) {
-                echo '<span style="color:red">'.$value.'</span>';
+                echo '<p><span style="color:red">'.$value.'</span></p>';
             }
         } else {
             createGroup($pdo);

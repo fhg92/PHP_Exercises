@@ -1,4 +1,5 @@
 <?php
+
 function checkEmail(&$error)
 {
     if(isset($_POST['email']) && !empty($_POST['email'])) {
@@ -9,6 +10,7 @@ function checkEmail(&$error)
         return true;
     }
 }
+
 function checkUserDb($pdo, &$error) {
     $sql = "SELECT email FROM user WHERE email = :email";
     $stmt = $pdo->prepare($sql);
@@ -21,6 +23,7 @@ function checkUserDb($pdo, &$error) {
     }
     return true;
 }
+
 function checkPass(&$error)
 {
     if(isset($_POST['register']) && !empty($_POST['password'])) { 

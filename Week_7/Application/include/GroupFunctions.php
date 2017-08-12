@@ -1,7 +1,13 @@
 <?php
 
-function formValidation(&$message)
+function formValidation($pdo, &$message)
 {
+    $sql = "SELECT group_name FROM groups WHERE group_name = :name";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':name', $_POST['group'], PDO::PARAM_STR);
+    $stmt->execute();
+    $group = $stmt->fetchColumn();
+    
     switch($_POST['group']) {
         case null:
             $message[] = 'Please fill in a group name.<br>'.PHP_EOL;
@@ -14,6 +20,11 @@ function formValidation(&$message)
             break;
         case strlen($_POST['group']) > 60:
             $message[] = 'Group name has to be less than 60 characters.<br>'
+                .PHP_EOL;
+            return false;
+            break;
+        case strcasecmp($group, $_POST['group']) == 0:
+            $message[] = 'Group name is already taken.<br>'
                 .PHP_EOL;
             return false;
             break;
@@ -66,6 +77,14 @@ function deleteGroup($pdo)
             }
             $stmt->bindValue(':groupId', $value, PDO::PARAM_INT);
             $stmt->execute();
+            
+            // Delete group if there are no users in it.
+            if($_POST['leave']) {
+                $sql = 'DELETE FROM groups WHERE group_id NOT IN (SELECT 
+                group_id FROM group_user)';
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute();
+            }
             
             header('Location: Groups.php');
         }
@@ -188,6 +207,14 @@ function getOtherGroups($pdo, $myGroups, $pending)
 
 function getCurrentGroup($pdo, &$admin)
 {
+    // Get group name.
+    $sql = 'SELECT group_name FROM groups WHERE group_id = :groupId';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':groupId', $_GET['id'], PDO::PARAM_INT);
+    $stmt->execute();
+    $name = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Get all rows from admin.
     $sql = 'SELECT * FROM group_user gu INNER JOIN groups g ON gu.group_id =
     g.group_id WHERE gu.group_id = :groupId AND gu.status = :status';
     $stmt = $pdo->prepare($sql);
@@ -197,7 +224,7 @@ function getCurrentGroup($pdo, &$admin)
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     
     echo '<form method="POST"><p><b>'.
-        ucfirst(htmlentities($admin['group_name'])).'</b>';
+        ucfirst(htmlentities($name['group_name'])).'</b>';
     
     // If admin exists and the admin's ID is equal to the current user ID.
     if($admin && $admin['user_id'] == $_SESSION['userid']) {
@@ -220,7 +247,6 @@ function getCurrentGroup($pdo, &$admin)
     
     deleteGroup($pdo);
 }
-
 function newAdmin($pdo)
 {
     if(isset($_POST['admin'])) {
@@ -235,7 +261,6 @@ function newAdmin($pdo)
         header('Location: Groups.php?id='.$_GET['id'].'');
     }
 }
-
 function getMembers($pdo, &$users, $admin)
 {
     $sql = 'SELECT u.first_name, u.last_name, u.user_id, g.status FROM 
@@ -302,7 +327,6 @@ function getMembers($pdo, &$users, $admin)
     header('Location: Groups.php?id='.$_GET['id'].'');
     }
 }
-
 function checkIfMember($users)
 {
     // Get id's from all members and put them in an array.
@@ -318,5 +342,4 @@ function checkIfMember($users)
         header('Location: Groups.php');
     }
 }
-
 ?>

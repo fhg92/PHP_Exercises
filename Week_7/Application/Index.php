@@ -32,7 +32,7 @@ getUserDetails($pdo, $details, $gender);
         <tr><td>Last login: <?= $date->format('F jS Y h:i:s a'); ?></td></tr>
     </table>
     <br>
-    <div class ='center'><form method='post'><button type='submit' onclick="return confirm('Are you sure you want to delete your profile?');" name='delete' value='<?= $_SESSION['userid'] ?>'>Delete account</button></form></div>
+    <div class ='center'><form method='post'><button type='submit' onclick="return confirm('Are you sure you want to delete your profile?');" name='delete' value='<?= $_SESSION['userid'] ?>'>Delete Profile</button></form></div>
     <?php deleteProfile($pdo); ?>
     </body>
 </html>
