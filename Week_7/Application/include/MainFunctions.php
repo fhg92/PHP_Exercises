@@ -9,7 +9,7 @@ function deleteFriend($pdo, &$relations)
     $stmt->execute();
     $relations = $stmt->fetchAll();  
     
-    if(isset($_POST['delete'])) {
+    if(isset($_POST['unfriend'])) {
         foreach($_POST as $value) {
             $sql= 'DELETE FROM relation WHERE user_one_id = :userOne AND user_two_id = :userTwo';
             $stmt = $pdo->prepare($sql);

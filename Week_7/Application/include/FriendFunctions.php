@@ -3,11 +3,11 @@
 function searchFriend($pdo)
 {
     if(isset($_POST['submit']) && strlen($_POST['search']) >= 3) {
-        $sql = 'SELECT * FROM user_personal u INNER JOIN relation r WHERE 
-        (u.first_name LIKE :search OR u.last_name LIKE :search OR u.city like 
-        :search) AND r.status = :status AND u.user_id = r.user_one_id AND 
-        r.user_two_id = :curUser OR r.status = :status AND u.user_id = 
-        r.user_two_id AND r.user_one_id = :curUser';
+        $sql = "SELECT * FROM user_personal u INNER JOIN relation r WHERE 
+        (CONCAT(u.first_name, ' ', u.last_name) LIKE :search OR
+        u.city like :search) AND r.status = :status AND u.user_id = 
+        r.user_one_id AND r.user_two_id = :curUser OR r.status = :status AND
+        u.user_id = r.user_two_id AND r.user_one_id = :curUser";
         
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':search', '%'.$_POST['search'].'%');
@@ -16,17 +16,17 @@ function searchFriend($pdo)
         $stmt->execute();
         $friends = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        echo '<table>';
         if(!$stmt->rowCount() == 0) {
             foreach($friends as $friend) {
-                $result .= '<tr><td><a href="Users.php?id='.$friend['user_id'].'">'
-                    .ucfirst(htmlentities($friend['first_name'])).' '.
-                htmlentities($friend['last_name'])."</a> <button type='submit'
-                name='delete' value='".$friend['user_id']."'>Delete</button>
-                </td></tr>";
+                $result .= '<tr><td><a href="Users.php?id='.$friend['user_id'].'">'.
+                ucfirst(htmlentities($friend['first_name'])).' '.
+                htmlentities($friend['last_name'])."<a></td></tr>";
             }
         } else {
             $result = '<tr><td>No users found matching your search.</td></tr>';
         }
+        echo '</table>';
     }
     if(isset($_POST['submit']) && strlen($_POST['search']) < 3) {
         $result = '<tr><td>No results found. Your search has to be at least 3 
@@ -41,6 +41,10 @@ function searchFriend($pdo)
     if(isset($_COOKIE['result'])) {
         echo '<table>'.$_COOKIE['result'].'</table>';
     }
+    if(isset($_POST['unfriend'])) {
+        header('Location: Index.php');
+    }
+    deleteFriend($pdo, $relations);
 }
 
 function getFriendList($pdo, $relations)
@@ -61,7 +65,7 @@ function getFriendList($pdo, $relations)
             echo '<tr><td><a href="Users.php?id='.$friend['user_id'].'">'.
                 ucfirst(htmlentities($friend['first_name'])).' '.
                 htmlentities($friend['last_name'])."<a> <button type='submit'
-                name='delete' value='".$friend['user_id']."'>Delete</button>
+                name='unfriend' value='".$friend['user_id']."'>Unfriend</button>
                 </td></tr>";
         }
     }

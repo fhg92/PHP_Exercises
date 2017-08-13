@@ -35,7 +35,8 @@ function requestCheck($pdo, $user)
             }
             if($sent[0] == 1) {
                 if(isset($_GET['id'])) {
-                    echo " <button type='submit' name='delete' value='".$_GET['id']."'>Delete</button>";
+                    echo " <button type='submit' name='delete' value='"
+                        .$_GET['id']."'>Delete</button>";
                 } else {
                     echo '';   
                 }
@@ -48,11 +49,12 @@ function requestCheck($pdo, $user)
             } else {
                 echo $user['user_id'];
             }
-            echo "'>Add</button>";
+            echo "'>Add Friend</button>";
         }
     } else {
         if(isset($_GET['id'])) {
-            echo " <button type='submit' name='delete' value='".$_GET['id']."'>Delete</button>";
+            echo " <button type='submit' name='unfriend' value='".$_GET['id']."'>
+            Unfriend</button>";
         } else {
             echo '';
         }
@@ -82,9 +84,8 @@ function addUser($pdo)
 function searchUser($pdo)
 {
     if(isset($_POST['search']) && strlen($_POST['search']) >= 3) {
-        $sql = 'SELECT * FROM user_personal WHERE user_id != :curUser AND 
-        first_name LIKE :search OR last_name LIKE :search OR city like :search';
-        
+        $sql = "SELECT * FROM user_personal WHERE user_id != :curUser AND
+        CONCAT(first_name, ' ', last_name) LIKE :search OR city LIKE :search LIMIT 25";
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':search', '%'.$_POST['search'].'%');
         $stmt->bindValue(':curUser', $_SESSION['userid']);

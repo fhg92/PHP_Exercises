@@ -247,6 +247,7 @@ function getCurrentGroup($pdo, &$admin)
     
     deleteGroup($pdo);
 }
+
 function newAdmin($pdo)
 {
     if(isset($_POST['admin'])) {
@@ -261,6 +262,7 @@ function newAdmin($pdo)
         header('Location: Groups.php?id='.$_GET['id'].'');
     }
 }
+
 function getMembers($pdo, &$users, $admin)
 {
     $sql = 'SELECT u.first_name, u.last_name, u.user_id, g.status FROM 
@@ -327,6 +329,7 @@ function getMembers($pdo, &$users, $admin)
     header('Location: Groups.php?id='.$_GET['id'].'');
     }
 }
+
 function checkIfMember($users)
 {
     // Get id's from all members and put them in an array.
