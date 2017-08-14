@@ -85,7 +85,7 @@ function searchUser($pdo)
 {
     if(isset($_POST['search']) && strlen($_POST['search']) >= 3) {
         $sql = "SELECT * FROM user_personal WHERE user_id != :curUser AND
-        CONCAT(first_name, ' ', last_name) LIKE :search OR city LIKE :search LIMIT 25";
+        CONCAT(first_name, ' ', last_name) LIKE :search OR city LIKE :search LIMIT 10";
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':search', '%'.$_POST['search'].'%');
         $stmt->bindValue(':curUser', $_SESSION['userid']);
@@ -122,7 +122,7 @@ function searchUser($pdo)
 
 function getUserList($pdo)
 {
-    $sql = 'SELECT * FROM user_personal WHERE user_id != :id';
+    $sql = 'SELECT * FROM user_personal WHERE user_id != :id LIMIT 25';
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':id', $_SESSION['userid'], PDO::PARAM_INT);
     $stmt->execute();
