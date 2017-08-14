@@ -7,9 +7,7 @@
 
 <?php
 
-// Fill in DB details here.
-$user = '';
-$pass = '';
+require('Config.php');
 
 if(isset($_POST['create'])) {
     try {

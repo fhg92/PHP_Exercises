@@ -11,10 +11,12 @@ require('DbConnect.php');
 
 if(isset($_POST['table'])) {
     $pdo->exec('DROP TABLE product_details');
+    echo '<span style="color:green;">Succesfully dropped table.</span>';
 }
 
 if(isset($_POST['schema'])) {
     $pdo->exec('DROP SCHEMA shop');
+    echo '<span style="color:green;">Succesfully dropped schema.</span>';
 }
 
 ?>
