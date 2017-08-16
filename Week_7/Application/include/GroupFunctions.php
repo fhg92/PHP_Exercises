@@ -1,5 +1,29 @@
 <?php
 
+class Groups implements JsonSerializable {
+    public function __construct(array $allGroups) {
+        $this->data = $allGroups;
+    }
+
+    public function jsonSerialize() {
+        return $this->data;
+    }
+}
+
+function json($pdo)
+{
+    if(isset($_GET['json']) && $_GET['json'] == 'true') {
+        require('include/DbConnect.php');
+        $sql = 'SELECT * FROM groups ORDER BY group_id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $allGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $options = JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT;
+        echo json_encode(new Groups($allGroups), $options);
+        exit;
+    }
+}
+
 function formValidation($pdo, &$message)
 {
     $sql = "SELECT group_name FROM groups WHERE group_name = :name";
@@ -67,7 +91,7 @@ function deleteGroup($pdo)
                 ON g.group_id = gu.group_id WHERE g.group_id = :groupId';
             }
             if($_POST['leave']) {
-                $sql = 'DELETE FROM group_user WHERE group_id = :groupId and 
+                $sql = 'DELETE FROM group_user WHERE group_id = :groupId AND 
                 user_id = :userId';
             }
             $stmt = $pdo->prepare($sql);
@@ -149,12 +173,37 @@ function pending($pdo, &$pending)
     echo '</table></form>';
 }
 
+function deleteIfOnlyPending($pdo)
+{
+    $sql = 'SELECT group_id FROM group_user WHERE status != :status';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':status', 0, PDO::PARAM_INT);
+    $stmt->execute();
+    $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $sql = 'SELECT group_id FROM group_user WHERE status = :status';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':status', 0, PDO::PARAM_INT);
+    $stmt->execute();
+    $pending = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $a = array_column($pending, 'group_id');
+    $b = array_column($members, 'group_id');
+    $c = array_unique(array_diff($a, $b));
+    
+    foreach($c as $id) {
+        $sql = 'DELETE gu, g FROM group_user gu INNER JOIN groups g ON 
+        gu.group_id = g.group_id WHERE gu.group_id = :groupId';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':groupId', $id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+}
+
 function getOtherGroups($pdo, $myGroups, $pending)
 {
-    $sql = 'SELECT * FROM groups g INNER JOIN group_user gu ON g.group_id = 
-    gu.group_id ORDER BY group_name';
+    $sql = 'SELECT * FROM groups ORDER BY group_id';
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':userId', $_SESSION['userid']);
     $stmt->execute();
     $allGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -212,7 +261,7 @@ function getCurrentGroup($pdo, &$admin)
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':groupId', $_GET['id'], PDO::PARAM_INT);
     $stmt->execute();
-    $name = $stmt->fetch(PDO::FETCH_ASSOC);
+    $name = $stmt->fetchColumn();
     
     // Get all rows from admin.
     $sql = 'SELECT * FROM group_user gu INNER JOIN groups g ON gu.group_id =
@@ -224,7 +273,7 @@ function getCurrentGroup($pdo, &$admin)
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     
     echo '<form method="POST"><p><b>'.
-        ucfirst(htmlentities($name['group_name'])).'</b>';
+        ucfirst(htmlentities($name)).'</b>';
     
     // If admin exists and the admin's ID is equal to the current user ID.
     if($admin && $admin['user_id'] == $_SESSION['userid']) {
@@ -252,8 +301,7 @@ function newAdmin($pdo)
 {
     if(isset($_POST['admin'])) {
         $sql = 'UPDATE group_user SET status = :status WHERE group_id = 
-        :groupId 
-        AND user_id = :userId';
+        :groupId AND user_id = :userId';
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':status', 2, PDO::PARAM_INT);
         $stmt->bindValue(':groupId', $_GET['id'], PDO::PARAM_INT);
@@ -345,4 +393,5 @@ function checkIfMember($users)
         header('Location: Groups.php');
     }
 }
+
 ?>

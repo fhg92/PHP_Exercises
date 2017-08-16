@@ -5,6 +5,8 @@ include('include/UserFunctions.php');
 
 getUserDetails($pdo, $details, $gender);
 
+date_default_timezone_set('Europe/Amsterdam');
+
 ?>
 
 <html>

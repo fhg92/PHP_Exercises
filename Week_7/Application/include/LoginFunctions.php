@@ -76,7 +76,7 @@ function checkPassDb($pdo, &$hash, &$error) {
         }
     }
 }
-function logIn($pdo, $hash, &$error) {
+function logIn($pdo, $hash, &$error) { 
     $password = $_POST['password'];
     
     if(password_verify($password, $hash) && $_POST['password'] != null) { 
@@ -93,11 +93,11 @@ function logIn($pdo, $hash, &$error) {
         $stmt->bindParam(':user', $userId, PDO::PARAM_STR);
         $stmt->execute();
         
-        session_start(); 
         $_SESSION['loggedin'] = true;
         $_SESSION['userid'] = $userId;
         $_SESSION['email'] = $_POST['email'];
         header('Location: Index.php');
+        exit;
     } else {
         $error = 'Login failed.<br>'.PHP_EOL;
     }

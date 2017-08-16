@@ -1,3 +1,8 @@
+<?php
+ob_start();
+session_start();
+?>
+
 <html>
     <body>
         <form method='post'>
@@ -13,6 +18,8 @@
         </form>
         
 <?php
+        
+session_start();
   
 include('include/DbConnect.php');
 include('include/LoginFunctions.php');

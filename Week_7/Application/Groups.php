@@ -1,6 +1,11 @@
 <?php
-include('include/Header.php');
+
 include('include/GroupFunctions.php');
+
+json($pdo);
+
+include('include/Header.php');
+
 ?>
 
 <html>
@@ -30,6 +35,8 @@ include('include/GroupFunctions.php');
     pending($pdo, $pending);
     echo '<p><b>Other Groups:</b></p>';
     getOtherGroups($pdo, $myGroups, $pending);
+    
+    deleteIfOnlyPending($pdo);
     
     } else {
         getCurrentGroup($pdo, $admin);

@@ -1,5 +1,29 @@
 <?php
 
+class Users implements JsonSerializable {
+    public function __construct(array $users) {
+        $this->data = $users;
+    }
+
+    public function jsonSerialize() {
+        return $this->data;
+    }
+}
+
+function json($pdo)
+{
+    if(isset($_GET['json']) && $_GET['json'] == 'true') {
+        require('include/DbConnect.php');
+        $sql = 'SELECT * FROM user_personal ORDER BY user_id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $options = JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT;
+        echo json_encode(new Users($users), $options);
+        exit;
+    }
+}
+
 function requestCheck($pdo, $user)
 {
     $sql = 'SELECT status FROM relation WHERE user_one_id = :u1 AND user_two_id

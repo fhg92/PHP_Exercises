@@ -1,7 +1,10 @@
 <?php
 
-include('include/Header.php');
 include('include/UserFunctions.php');
+
+json($pdo);
+
+include('include/Header.php');
 
 if(isset($_GET['id'])) {
     include('include/MainFunctions.php');
@@ -15,6 +18,7 @@ getUserDetails($pdo, $details, $gender);
         <title>
         <?php
         if(isset($_GET['id'])) {
+            date_default_timezone_set('Europe/Amsterdam');
             echo ucfirst(htmlentities($details['first_name'])).' '.
             htmlentities($details['last_name']);
         } else {
@@ -38,7 +42,7 @@ getUserDetails($pdo, $details, $gender);
         <?php $date = new DateTime($details['date_of_birth']); ?>
         <tr><td>Birth date: <?= $date->format('F jS'); ?></td></tr>
         <tr><td>Birth year: <?= $date->format('Y'); ?></td></tr>
-        <tr><td>Gender: <?= $gender['label']; ?></td></tr>
+        <tr><td>Gender: <?= $details['label']; ?></td></tr>
         <?php $date = new DateTime($details['date_registered']); ?>
         <tr><td>Date registered: <?= $date->format('F jS Y'); ?></td></tr>
         <?php $date = new DateTime($details['last_login']); ?>
