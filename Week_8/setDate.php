@@ -11,8 +11,13 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $dob = $stmt->fetchColumn();
 
-$date = new DateTime($dob);
-$date->setDate($dob);
-echo $date->format('Y-m-d');
+$d = explode('-', $dob);
+
+$date = new DateTime();
+$date->setDate($d[0], $d[1], $d[2]);
+$date->setTime(0,0,0);
+echo $date->format('Y-m-d').'<br>'.PHP_EOL;
+
+var_dump($date);
 
 ?>
