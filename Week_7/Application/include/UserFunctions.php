@@ -12,16 +12,14 @@ class Users implements JsonSerializable {
 
 function json($pdo)
 {
-    if(isset($_GET['json']) && $_GET['json'] == 'true') {
-        require('include/DbConnect.php');
-        $sql = 'SELECT * FROM user_personal ORDER BY user_id';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $options = JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT;
-        echo json_encode(new Users($users), $options);
-        exit;
-    }
+    require('include/DbConnect.php');
+    $sql = 'SELECT * FROM user_personal ORDER BY user_id';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $options = JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT;
+    echo json_encode(new Users($users), $options);
+    exit;
 }
 
 function requestCheck($pdo, $user)
@@ -121,9 +119,13 @@ function searchUser($pdo)
             foreach($users as $user) {
                 $result .= '<tr><td><a href="Users.php?id='.$user['user_id'].'">
                 '.ucfirst(htmlentities($user['first_name'])).' '.
-                    htmlentities($user['last_name']).'</a></td></tr>';
+                    htmlentities($user['last_name']).'</a>';
+                    
+                $result .= '</td></tr>';
+ requestCheck($pdo, $user);    
+                addUser($pdo);
+                
             }
-            echo 'hoi';
         } else {
             $result = '<tr><td>No users found matching your search.</td></tr>';
         }

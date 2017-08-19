@@ -2,7 +2,9 @@
 
 include('include/UserFunctions.php');
 
-json($pdo);
+if(isset($_GET['json']) && $_GET['json'] == 'true') {
+    json($pdo);
+}
 
 include('include/Header.php');
 
@@ -48,7 +50,7 @@ getUserDetails($pdo, $details, $gender);
         <?php $date = new DateTime($details['last_login']); ?>
         <tr><td>Last login:
             <?php
-            if($details['last_login'] == '0000-00-00 00:00:00') {
+            if($details['last_login'] == NULL) {
                 echo 'Not logged in yet';
             } else {
                echo $date->format('F jS Y h:i:s a'); 

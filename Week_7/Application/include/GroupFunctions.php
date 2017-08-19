@@ -12,16 +12,14 @@ class Groups implements JsonSerializable {
 
 function json($pdo)
 {
-    if(isset($_GET['json']) && $_GET['json'] == 'true') {
-        require('include/DbConnect.php');
-        $sql = 'SELECT * FROM groups ORDER BY group_id';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $allGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $options = JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT;
-        echo json_encode(new Groups($allGroups), $options);
-        exit;
-    }
+    require('include/DbConnect.php');
+    $sql = 'SELECT * FROM groups ORDER BY group_id';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $allGroups = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $options = JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT;
+    echo json_encode(new Groups($allGroups), $options);
+    exit;
 }
 
 function formValidation($pdo, &$message)

@@ -2,7 +2,9 @@
 
 include('include/GroupFunctions.php');
 
-json($pdo);
+if(isset($_GET['json']) && $_GET['json'] == 'true') {
+    json($pdo);
+}
 
 include('include/Header.php');
 

@@ -18,8 +18,6 @@ session_start();
         </form>
         
 <?php
-        
-session_start();
   
 include('include/DbConnect.php');
 include('include/LoginFunctions.php');
