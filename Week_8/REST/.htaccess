@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule ^json/(.*)$ Index.php?json=$1 [QSA]
