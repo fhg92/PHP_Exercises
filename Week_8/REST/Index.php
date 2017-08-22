@@ -1,76 +1,53 @@
-<!-- UNDER CONSTRUCTION -->
+<!-- Not done yet. -->
 
-<?php if(!isset($_GET['json'])) { ?>
-<html>
-    <body>
-        <form method='post'>
-            <div>
-                <input type='text' name='id' placeholder='Enter ID'/>
-            </div>
-            <br>
-            <input type='submit'/>
-        </form>
-    </body>
-</html>
-<?php 
-
-} 
+<?php
 
 require_once('DbConnect.php');
 
-$sql = 'SELECT * FROM user_personal u INNER JOIN gender g ON u.gender_id = 
-g.gender_id';
-$stmt = $pdo->prepare($sql);
-$stmt->execute();
-$details = $stmt->fetchAll(PDO::FETCH_OBJ);
-$json = json_encode($details);
-
-$decode = json_decode($json, true);
-
 $method = $_SERVER['REQUEST_METHOD'];
 
-if($method == 'GET') {
-    if(isset($_GET['json'])) {
+$data = json_decode(file_get_contents('php://input'));
+
+switch($method) {
+    case 'GET':
+        $sql = 'SELECT * FROM user u INNER JOIN user_personal up ON u.user_id 
+        = up.user_id WHERE u.user_id = :id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $_GET['json'], PDO::PARAM_INT);
+        $stmt->execute();
+        $details = $stmt->fetch(PDO::FETCH_OBJ);
+        echo json_encode($details);
+        break;
+    case 'POST':
+        $stmt = $pdo->prepare('INSERT INTO user(email, password) 
+        VALUES (?, ?)');
+        $stmt->execute([$data->email, $data->password]);
             
-        $i = -1;
-
-        foreach($decode as $d) {
-
-            $i++;
-
-            if(strcasecmp($d['user_id'], $_GET['json']) == 0) {
-                $shortjson = json_encode($decode[$i], true);
-                echo $shortjson;
-                break;
-            }
-        }
-    }
-}
-
-if($method == 'POST') {
-    
-    $newjson = file_get_contents(
-        'http://localhost/~Frank/PHP_Exercises/Week_8/REST/json/'
-        .$_POST['id'].'');
-    
-    $dec = json_decode($newjson);
-    
-    if(isset($dec->user_id)) {
-    
-    echo '<table><tr><td><b>ID:</b></td><td>'.$dec->user_id.'</td></tr>
-    <tr><td><b>First Name:</b></td><td>'.$dec->first_name.'</td></tr>
-    <tr><td><b>Last Name:</b></td><td>'.$dec->last_name.'</td></tr>
-    <tr><td><b>City:</b></td><td>'.$dec->city.'</td></tr>
-    <tr><td><b>Date of Birth:</b></td><td>'.$dec->date_of_birth.'</td></tr>
-    <tr><td><b>Gender:</b></td><td>'.$dec->label.'</td></tr>
-    <tr><td><b>Date Registered:</b></td><td>'.$dec->date_registered.'</td>
-    </tr><tr><td><b>Last Login:</b></td><td>'.$dec->last_login.'</td></tr>
-    <table>';
-    
-    } else {
-        echo '<span style="color:red">No user found.</span>';
-    }
-    
+        $sql = 'INSERT INTO user_personal(first_name, last_name, city, 
+        date_of_birth, gender_id) VALUES (?, ?, ?, ?, ?)';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$data->first_name, $data->last_name, $data->city,
+                      $data->date_of_birth, $data->gender]);
+        break;
+    case 'PUT':
+        $sql = 'UPDATE user_personal SET first_name = :first, last_name = :last
+        , city = :city, date_of_birth = :dob, gender_id = :gender WHERE 
+        user_id = :id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $_GET['json'], PDO::PARAM_INT);
+        $stmt->bindValue(':first', $data->first_name, PDO::PARAM_STR);
+        $stmt->bindValue(':last', $data->last_name, PDO::PARAM_STR);
+        $stmt->bindValue(':city', $data->city, PDO::PARAM_STR);
+        $stmt->bindValue(':dob', $data->date_of_birth, PDO::PARAM_STR);
+        $stmt->bindValue(':gender', $data->gender_id, PDO::PARAM_INT);
+        $stmt->execute();
+        break;
+    case 'DELETE':
+        $sql = 'DELETE FROM user WHERE user_id = :id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $_GET['json'], PDO::PARAM_INT);
+        $stmt->execute();
+        break;
 }
 
 ?>
