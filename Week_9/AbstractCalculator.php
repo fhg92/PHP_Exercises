@@ -21,13 +21,17 @@ abstract class Calculator
     private $op;
     
     abstract public function calc();
+    
+    public function result()
+    {
+        echo $this->calc();
+    }
 }
 
 class Extend extends Calculator
 {
     public function __construct($num1, $op ,$num2)
     {
-
         $this->num1 = (int) $num1;
         $this->op = $op;
         $this->num2 = (int) $num2;
@@ -37,16 +41,16 @@ class Extend extends Calculator
     {   
         switch($this->op) {
             case '+':
-                echo $this->num1 + $this->num2;
+                return $this->num1 + $this->num2;
                 break;
             case '-':
-                echo $this->num1 - $this->num2;
+                return $this->num1 - $this->num2;
                 break;
             case '*':
-                echo $this->num1 * $this->num2;
+                return $this->num1 * $this->num2;
                 break;
             case '/':
-                echo $this->num1 / $this->num2;
+                return $this->num1 / $this->num2;
                 break;
         }   
     }
@@ -54,5 +58,5 @@ class Extend extends Calculator
 
 if(isset($_POST['submit'])) {
     $calc = new Extend($_POST['num1'], $_POST['op'], $_POST['num2']);
-    $calc->calc();
+    $calc->result();
 }
