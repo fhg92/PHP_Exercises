@@ -37,7 +37,7 @@ class Extend extends Calculator
         $this->num2 = (int) $num2;
     }
     
-    public function calc()
+    public function calc($num1, $op ,$num2)
     {   
         switch($this->op) {
             case '+':
