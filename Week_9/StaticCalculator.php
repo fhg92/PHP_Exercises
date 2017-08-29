@@ -13,7 +13,6 @@ class StaticCalculator
     }
 }
 
-
 StaticCalculator::plus(1,5);
 StaticCalculator::minus(5,1);
 

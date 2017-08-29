@@ -82,7 +82,13 @@ class Test
 // Class Test2 is used for testing __sleep and __wakeup.
 class Test2
 {
-    private $username, $password;
+    public $username, $password;
+    
+    public function __construct($username, $password)
+    {
+        $this->username = $username;
+        $this->password = $password;
+    }
       
     public function __sleep()
     {
@@ -150,7 +156,8 @@ $obj('This is a value.');
 $obj2 = clone $obj;
 var_dump($obj2);
 
-$obj3 = new Test2;
+$obj3 = new Test2('JustSomeUsername', 'ThisIsAPassword');
+var_dump($obj3);
 
 $data = serialize($obj3).PHP_EOL;
 echo $data.PHP_EOL;
