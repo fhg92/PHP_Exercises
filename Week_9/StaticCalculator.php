@@ -17,8 +17,4 @@ class StaticCalculator
 StaticCalculator::plus(1,5);
 StaticCalculator::minus(5,1);
 
-/*$sc = new StaticCalculator;
-$sc->plus(1,5);
-$sc->minus(5,1);*/
-
 ?>

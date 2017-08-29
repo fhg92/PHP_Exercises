@@ -12,7 +12,7 @@ interface Operator2
     public function divide();
 }
 
-class Calculator implements Operator1, Operator2
+class InterfaceCalculator implements Operator1, Operator2
 {
     public function __construct($num1, $num2)
     {
@@ -42,7 +42,7 @@ class Calculator implements Operator1, Operator2
     
     public function instantiate()
     {
-        $calc = new Calculator(0,0);
+        $calc = new InterfaceCalculator(0,0);
         if($calc instanceof Operator1) {
             echo 'Calculator is a instance of Operator1<br>'.PHP_EOL;
         }
@@ -52,7 +52,7 @@ class Calculator implements Operator1, Operator2
     }
 }
 
-$calc = new Calculator(3,5);
+$calc = new InterfaceCalculator(3,5);
 echo $calc->times();
 echo $calc->plus();
 echo $calc->instantiate();

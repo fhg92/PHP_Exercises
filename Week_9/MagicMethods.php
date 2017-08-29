@@ -1,7 +1,5 @@
 <?php
 
-// To do: add more comments. 
-
 class Test
 {
 
