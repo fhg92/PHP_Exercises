@@ -27,7 +27,15 @@ $closure = $a->method();
 
 $b = new B();
 
-$newClosure = $closure->bindTo($b, 'B');
-$newClosure();
+// bindTo().
+//$new = $closure->bindTo($b, 'B');
+//$new();
+
+// Static bind.
+//$new = Closure::bind($closure, $b, 'B');
+//$new();
+
+// PHP7 substitute of bindTo.
+$closure->call($b);
 
 ?>
